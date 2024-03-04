@@ -1,0 +1,9 @@
+Instantiated with filepath=None->None, scale=[0.0010000000474974513, 0.0010000000474974513, 0.0010000000474974513], mesh=<bpy_struct, Mesh("ON-OFF-PAW-Alumínio_MEF.148") at 0x7f062dde0008>, meshname=ON-OFF-PAW-Alumínio_MEF.148, material=None, mesh_orientation=None, {}
+->trying export of <bpy_struct, Mesh("ON-OFF-PAW-Alumínio_MEF.148") at 0x7f062dde0008> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/obj/ON-OFF-PAW-Alumínio_MEF.148.obj
+->wrote obj to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/obj/ON-OFF-PAW-Alumínio_MEF.148.obj from bpy_types.Mesh
+->trying export of <bpy_struct, Mesh("ON-OFF-PAW-Alumínio_MEF.148") at 0x7f062dde0008> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/bobj/ON-OFF-PAW-Alumínio_MEF.148.bobj
+->wrote bobj to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/bobj/ON-OFF-PAW-Alumínio_MEF.148.bobj from bpy_types.Mesh
+->trying export of <bpy_struct, Mesh("ON-OFF-PAW-Alumínio_MEF.148") at 0x7f062dde0008> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/stl/ON-OFF-PAW-Alumínio_MEF.148.stl
+->wrote stl to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/stl/ON-OFF-PAW-Alumínio_MEF.148.stl from bpy_types.Mesh
+->trying export of <bpy_struct, Mesh("ON-OFF-PAW-Alumínio_MEF.148") at 0x7f062dde0008> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/dae/ON-OFF-PAW-Alumínio_MEF.148.dae
+->wrote dae to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/dae/ON-OFF-PAW-Alumínio_MEF.148.dae from bpy_types.Mesh
