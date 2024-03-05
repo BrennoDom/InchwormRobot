@@ -2,51 +2,51 @@
   <link name="base_link_dummy"/>
     <joint name="dummy_joint" type="fixed">
     <parent link="base_link_dummy"/>
-    <child link="LINK_7"/>
+    <child link="robot2/LINK_7"/>
   </joint>
   <joint name="J1" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 -0.00000 0.00000" xyz="0.00000 -0.10900 0.00000"/>
-    <parent link="LINK_2"/>
-    <child link="LINK_1"/>
+    <parent link="robot2/LINK_2"/>
+    <child link="robot2/LINK_1"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J2" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="0.00000 0.00000 -1.57080" xyz="-0.20000 -0.00000 0.00000"/>
-    <parent link="LINK_3"/>
-    <child link="LINK_2"/>
+    <parent link="robot2/LINK_3"/>
+    <child link="robot2/LINK_2"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J3" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-3.00824 1.57080 1.70415" xyz="-0.00000 -0.00000 0.13800"/>
-    <parent link="LINK_4"/>
-    <child link="LINK_3"/>
+    <parent link="robot2/LINK_4"/>
+    <child link="robot2/LINK_3"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J4" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00000 0.06200 0.00000"/>
-    <parent link="LINK_5"/>
-    <child link="LINK_4"/>
+    <parent link="robot2/LINK_5"/>
+    <child link="robot2/LINK_4"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J5" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 -0.00000 -0.00000" xyz="-0.00000 -0.00000 0.10900"/>
-    <parent link="LINK_6"/>
-    <child link="LINK_5"/>
+    <parent link="robot2/LINK_6"/>
+    <child link="robot2/LINK_5"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J6" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-0.00000 0.00000 -3.14159" xyz="-0.00000 -0.00000 0.07100"/>
-    <parent link="LINK_7"/>
-    <child link="LINK_6"/>
+    <parent link="robot2/LINK_7"/>
+    <child link="robot2/LINK_6"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
-  <link name="LINK_1">
+  <link name="robot2/LINK_1">
     <collision name="LINK_1_collision">
       <origin rpy="-3.14159 0.00000 3.14159" xyz="-0.01529 -0.00000 0.03467"/>
       <geometry>
@@ -66,7 +66,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_2">
+  <link name="robot2/LINK_2">
     <collision name="LINK_2_collision">
       <origin rpy="-0.00000 0.00000 0.00000" xyz="0.00000 -0.05718 -0.00606"/>
       <geometry>
@@ -86,7 +86,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_3">
+  <link name="robot2/LINK_3">
     <collision name="LINK_3_collision">
       <origin rpy="-0.00000 0.00000 -1.57266" xyz="-0.09827 0.00013 0.00235"/>
       <geometry>
@@ -106,7 +106,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_4">
+  <link name="robot2/LINK_4">
     <collision name="LINK_4_collision">
       <origin rpy="1.57080 -0.02402 -0.00000" xyz="-0.00013 -0.00292 0.05933"/>
       <geometry>
@@ -126,7 +126,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_5">
+  <link name="robot2/LINK_5">
     <collision name="LINK_5_collision">
       <origin rpy="-0.00000 -0.00000 0.00509" xyz="-0.00008 0.02546 0.00105"/>
       <geometry>
@@ -146,7 +146,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_6">
+  <link name="robot2/LINK_6">
     <collision name="LINK_6_collision">
       <origin rpy="1.57080 -0.00000 -0.00000" xyz="-0.00004 0.01268 0.04535"/>
       <geometry>
@@ -166,7 +166,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_7">
+  <link name="robot2/LINK_7">
     <collision name="LINK_7_collision">
       <origin rpy="-0.00000 -0.00000 0.00000" xyz="0.01628 0.00000 0.03221"/>
       <geometry>
