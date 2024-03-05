@@ -20,7 +20,7 @@ def generate_launch_description():
         namespace='robot1',
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        name='robot_state_publisher_1',
+        name='robot_state_publisher',
         parameters=[
             {'robot_description': robot_urdf}
         ]
@@ -29,7 +29,7 @@ def generate_launch_description():
         namespace='robot1',
         package='joint_state_publisher',
         executable='joint_state_publisher',
-        name='joint_state_publisher_1'
+        name='joint_state_publisher'
     )
 
     return LaunchDescription([
