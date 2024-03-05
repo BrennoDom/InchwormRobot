@@ -1,4 +1,9 @@
 <robot name="escalador_serial_1" version="1.0">
+  <link name="base_link_dummy"/>
+    <joint name="dummy_joint" type="fixed">
+    <parent link="base_link_dummy"/>
+    <child link="LINK_1"/>
+  </joint>
   <joint name="J1" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-0.00000 -0.00000 3.14159" xyz="0.00000 -0.00000 0.07100"/>
@@ -181,6 +186,7 @@
       </geometry>
     </visual>
   </link>
+  
   <material name="ROBO">
     <color rgba="0.80000 0.80000 0.80000 1.00000"/>
   </material>
