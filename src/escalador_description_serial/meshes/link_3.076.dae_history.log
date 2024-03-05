@@ -1,9 +1,0 @@
-Instantiated with filepath=None->None, scale=[0.0010000001639127731, 0.0010000001639127731, 0.0010000000474974513], mesh=<bpy_struct, Mesh("link_3.076") at 0x7f062e9a6808>, meshname=link_3.076, material=None, mesh_orientation=None, {}
-->trying export of <bpy_struct, Mesh("link_3.076") at 0x7f062e9a6808> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/obj/link_3.076.obj
-->wrote obj to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/obj/link_3.076.obj from bpy_types.Mesh
-->trying export of <bpy_struct, Mesh("link_3.076") at 0x7f062e9a6808> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/bobj/link_3.076.bobj
-->wrote bobj to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/bobj/link_3.076.bobj from bpy_types.Mesh
-->trying export of <bpy_struct, Mesh("link_3.076") at 0x7f062e9a6808> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/stl/link_3.076.stl
-->wrote stl to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/stl/link_3.076.stl from bpy_types.Mesh
-->trying export of <bpy_struct, Mesh("link_3.076") at 0x7f062e9a6808> to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/dae/link_3.076.dae
-->wrote dae to /home/brennoisi/Documents/ESCALADOR-BLENDER/URDFS/V3/escalador_serial/meshes/dae/link_3.076.dae from bpy_types.Mesh

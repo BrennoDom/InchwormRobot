@@ -1,0 +1,190 @@
+<robot name="escalador_serial_2" version="1.0">
+  <joint name="J1" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="1.57080 -0.00000 0.00000" xyz="0.00000 -0.10900 0.00000"/>
+    <parent link="LINK_2"/>
+    <child link="LINK_1"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
+  <joint name="J2" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="0.00000 0.00000 -1.57080" xyz="-0.20000 -0.00000 0.00000"/>
+    <parent link="LINK_3"/>
+    <child link="LINK_2"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
+  <joint name="J3" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="-3.00824 1.57080 1.70415" xyz="-0.00000 -0.00000 0.13800"/>
+    <parent link="LINK_4"/>
+    <child link="LINK_3"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
+  <joint name="J4" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00000 0.06200 0.00000"/>
+    <parent link="LINK_5"/>
+    <child link="LINK_4"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
+  <joint name="J5" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="1.57080 -0.00000 -0.00000" xyz="-0.00000 -0.00000 0.10900"/>
+    <parent link="LINK_6"/>
+    <child link="LINK_5"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
+  <joint name="J6" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="-0.00000 0.00000 -3.14159" xyz="-0.00000 -0.00000 0.07100"/>
+    <parent link="LINK_7"/>
+    <child link="LINK_6"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
+  <link name="LINK_1">
+    <collision name="LINK_1_collision">
+      <origin rpy="-3.14159 0.00000 3.14159" xyz="-0.01529 -0.00000 0.03467"/>
+      <geometry>
+        <box size="0.07660 0.05818 0.06860"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00065" ixy="0.00000" ixz="0.00008" iyy="0.00105" iyz="0.00000" izz="0.00081"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00889 0.00002 0.04189"/>
+      <mass value="1.50000"/>
+    </inertial>
+    <visual name="LINK_1_visual">
+      <origin rpy="-3.14159 0.00000 -3.14159" xyz="0.00000 -0.00000 0.00000"/>
+      <material name="SILVER"/>
+      <geometry>
+        <mesh filename="file://$(find escalador_description_serial_2)/meshes/ON-OFF-PAW-Alumínio_MEF.148.dae" scale="0.00100 0.00100 0.00100"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="LINK_2">
+    <collision name="LINK_2_collision">
+      <origin rpy="-0.00000 0.00000 0.00000" xyz="0.00000 -0.05718 -0.00606"/>
+      <geometry>
+        <box size="0.03961 0.06205 0.07038"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00163" ixy="0.00000" ixz="0.00000" iyy="0.00131" iyz="-0.00016" izz="0.00057"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00000 -0.05421 -0.00420"/>
+      <mass value="1.50000"/>
+    </inertial>
+    <visual name="LINK_2_visual">
+      <origin rpy="-0.00000 -0.00000 0.00000" xyz="-0.00000 -0.00000 -0.00000"/>
+      <material name="ROBO"/>
+      <geometry>
+        <mesh filename="file://$(find escalador_description_serial_2)/meshes/link_1_5.073.dae" scale="0.00100 0.00100 0.00100"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="LINK_3">
+    <collision name="LINK_3_collision">
+      <origin rpy="-0.00000 0.00000 -1.57266" xyz="-0.09827 0.00013 0.00235"/>
+      <geometry>
+        <box size="0.03412 0.14763 0.05773"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00675" ixy="0.00000" ixz="-0.00001" iyy="0.00674" iyz="0.00009" izz="0.00034"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.09288 -0.00001 0.00117"/>
+      <mass value="1.50000"/>
+    </inertial>
+    <visual name="LINK_3_visual">
+      <origin rpy="0.00000 0.00000 -1.04791" xyz="0.00000 -0.00000 -0.00000"/>
+      <material name="SILVER"/>
+      <geometry>
+        <mesh filename="file://$(find escalador_description_serial_2)/meshes/link_2.dae" scale="0.00100 0.00100 0.00100"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="LINK_4">
+    <collision name="LINK_4_collision">
+      <origin rpy="1.57080 -0.02402 -0.00000" xyz="-0.00013 -0.00292 0.05933"/>
+      <geometry>
+        <box size="0.02774 0.09960 0.05199"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00250" ixy="0.00000" ixz="-0.00000" iyy="0.00216" iyz="0.00028" izz="0.00058"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00009 0.00263 0.06197"/>
+      <mass value="1.50000"/>
+    </inertial>
+    <visual name="LINK_4_visual">
+      <origin rpy="1.57080 0.52360 0.00000" xyz="-0.00000 0.00000 -0.00000"/>
+      <material name="SILVER"/>
+      <geometry>
+        <mesh filename="file://$(find escalador_description_serial_2)/meshes/link_3.076.dae" scale="0.00100 0.00100 0.00100"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="LINK_5">
+    <collision name="LINK_5_collision">
+      <origin rpy="-0.00000 -0.00000 0.00509" xyz="-0.00008 0.02546 0.00105"/>
+      <geometry>
+        <box size="0.03510 0.07617 0.03941"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00083" ixy="0.00000" ixz="-0.00000" iyy="0.00073" iyz="0.00001" izz="0.00035"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00007 0.02556 0.00099"/>
+      <mass value="1.50000"/>
+    </inertial>
+    <visual name="LINK_5_visual">
+      <origin rpy="0.00000 0.00000 -0.52299" xyz="0.00000 -0.00000 0.00000"/>
+      <material name="ROBO"/>
+      <geometry>
+        <mesh filename="file://$(find escalador_description_serial_2)/meshes/link_4.003.dae" scale="0.00100 0.00100 0.00100"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="LINK_6">
+    <collision name="LINK_6_collision">
+      <origin rpy="1.57080 -0.00000 -0.00000" xyz="-0.00004 0.01268 0.04535"/>
+      <geometry>
+        <box size="0.03018 0.06809 0.06256"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00164" ixy="-0.00000" ixz="0.00000" iyy="0.00131" iyz="0.00016" izz="0.00057"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00000 0.00420 0.05387"/>
+      <mass value="1.50000"/>
+    </inertial>
+    <visual name="LINK_6_visual">
+      <origin rpy="1.57080 -0.00000 -0.00000" xyz="-0.00000 -0.00000 0.00000"/>
+      <material name="SILVER"/>
+      <geometry>
+        <mesh filename="file://$(find escalador_description_serial_2)/meshes/link_1_5.003.dae" scale="0.00100 0.00100 0.00100"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="LINK_7">
+    <collision name="LINK_7_collision">
+      <origin rpy="-0.00000 -0.00000 0.00000" xyz="0.01628 0.00000 0.03221"/>
+      <geometry>
+        <box size="0.07085 0.05381 0.06345"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00065" ixy="-0.00000" ixz="0.00008" iyy="0.00105" iyz="-0.00000" izz="0.00081"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="0.00889 0.00002 0.02822"/>
+      <mass value="1.50000"/>
+    </inertial>
+    <visual name="LINK_7_visual">
+      <origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 -0.00000 0.00000"/>
+      <material name="ROBO"/>
+      <geometry>
+        <mesh filename="file://$(find escalador_description_serial_2)/meshes/ON-OFF-PAW-Alumínio_MEF.050.dae" scale="0.00100 0.00100 0.00100"/>
+      </geometry>
+    </visual>
+  </link>
+  <material name="ROBO">
+    <color rgba="0.80000 0.80000 0.80000 1.00000"/>
+  </material>
+  <material name="SILVER">
+    <color rgba="0.80000 0.80000 0.80000 1.00000"/>
+  </material>
+</robot>
