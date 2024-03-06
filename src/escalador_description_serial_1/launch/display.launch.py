@@ -23,7 +23,11 @@ def generate_launch_description():
         name='robot_state_publisher',
         parameters=[
             {'robot_description': robot_urdf}
-        ]
+        
+        ],
+        remappings = [('/tf', 'tf'), 
+              ('/tf_static', 'tf_static')]
+
     )
     joint_state_publisher_node = Node(
         namespace='robot1',
