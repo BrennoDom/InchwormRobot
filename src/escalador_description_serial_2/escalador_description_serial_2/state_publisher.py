@@ -25,7 +25,7 @@ class StatePublisher(Node):
         J1 = 0.
         J2 = 0.
         J3 = 0.
-        J4 = 0.
+        J4 = 50.
         J5 = 0.
         J6 = 0.0
 
