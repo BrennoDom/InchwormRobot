@@ -7,6 +7,13 @@
     <child link="${prefix}LINK_7" />
   </joint>
 
+  <link name="${prefix}end-effector"/>
+
+  <joint name="end_joint" type="fixed">
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.07100"/>
+    <parent link="${prefix}LINK_1"/>
+    <child link="${prefix}end-effector"/>
+  </joint>
  <joint name="J1" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 -0.00000 0.00000" xyz="0.00000 -0.10900 0.00000"/>

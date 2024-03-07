@@ -1,10 +1,20 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
   <xacro:macro name="robot1" params="parent prefix *origin">
-    <joint name="${prefix}base_joint" type="fixed">
+  <joint name="${prefix}base_joint" type="fixed">
     <xacro:insert_block name="origin" />
     <parent link="${parent}"/>
     <child link="${prefix}LINK_1" />
+  </joint>
+
+  <link name="${prefix}end-effector"/>
+
+  <joint name="end_joint" type="fixed">
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.07100"/>
+    <parent link="${prefix}LINK_7"/>
+    <child link="${prefix}end-effector"/>
   </joint>
 
   <joint name="J1" type="revolute">

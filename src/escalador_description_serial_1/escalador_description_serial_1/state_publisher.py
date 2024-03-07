@@ -36,7 +36,7 @@ class StatePublisher(Node):
 
     def joint_callback(self, msg):
        
-       self.get_logger().info(str(msg.position))
+       #self.get_logger().info(str(msg.position))
        self.position =[0,0,0,0,0,0]
 
        self.J1 = msg.position[0]
@@ -48,8 +48,8 @@ class StatePublisher(Node):
 
     def publish_joint(self):
         odom_trans = TransformStamped()
-        odom_trans.header.frame_id = 'odom1'
-        odom_trans.child_frame_id = 'robot1/LINK_1'
+        odom_trans.header.frame_id = 'robot1/end-effector'
+        odom_trans.child_frame_id = 'robot2/LINK_7'
         joint_state = JointState()
         now = self.get_clock().now()
         joint_state.header.stamp = now.to_msg()
@@ -63,7 +63,7 @@ class StatePublisher(Node):
         odom_trans.transform.translation.y = 0.0
         odom_trans.transform.translation.z = 0.0
         odom_trans.transform.rotation = \
-        euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
+        euler_to_quaternion(0, 3.14, 0) # roll,pitch,yaw
 
                 # send the joint state and transform
         self.joint_pub.publish(joint_state)

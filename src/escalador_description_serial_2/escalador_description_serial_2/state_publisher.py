@@ -34,7 +34,7 @@ class StatePublisher(Node):
 
     def joint_callback(self, msg):
        
-       self.get_logger().info(str(msg.position))
+       #self.get_logger().info(str(msg.position))
        self.position =[0,0,0,0,0,0]
 
        self.J1 = msg.position[0]
@@ -46,13 +46,13 @@ class StatePublisher(Node):
 
     def publish_joint(self):
         odom_trans = TransformStamped()
-        odom_trans.header.frame_id = 'odom2'
-        odom_trans.child_frame_id = 'robot2/LINK_7'
+        odom_trans.header.frame_id = 'robot2/end-effector'
+        odom_trans.child_frame_id = 'robot1/LINK_1'
         joint_state = JointState()
         now = self.get_clock().now()
         joint_state.header.stamp = now.to_msg()
         joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
-        joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
+        joint_state.position = [self.J1, -self.J2, -self.J3, self.J4, -self.J5, self.J6]
 
         # update transform
         # (moving in a circle with radius=2)

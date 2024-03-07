@@ -22,12 +22,12 @@ class StatePublisher(Node):
         loop_rate = self.create_rate(30)
 
         # robot state
-        J1 = 0.
-        J2 = 0.
-        J3 = 0.
-        J4 = 50.
-        J5 = 0.
-        J6 = 0.0
+        J1 = 0.0 * degree
+        J2 = 60.0 * degree
+        J3 = 60.0 * degree
+        J4 = 0.0 * degree
+        J5 = 60.0 * degree
+        J6 = 0.0 * degree
 
         # message declarations
         joint_state = JointState()
