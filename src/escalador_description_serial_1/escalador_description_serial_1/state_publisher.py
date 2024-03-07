@@ -6,7 +6,6 @@ from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
 from tf2_ros import TransformBroadcaster, TransformStamped
 from rclpy.executors import SingleThreadedExecutor
-from .state_subscriber import StateSubscriber
 from rclpy.logging import LoggingSeverity
 
 class StatePublisher(Node):
@@ -28,7 +27,7 @@ class StatePublisher(Node):
         self.timer_ = self.create_timer(0.1, self.publish_joint)
         self.get_logger().info("{0} started".format(self.nodeName))
 
-        self.create_subscription(JointState,'/robot2/joint_states',self.joint_callback,qos_profile)
+        self.create_subscription(JointState,'/joint_states',self.joint_callback,qos_profile)
 
         degree = pi / 180.0
         loop_rate = self.create_rate(30)
@@ -49,8 +48,8 @@ class StatePublisher(Node):
 
     def publish_joint(self):
         odom_trans = TransformStamped()
-        odom_trans.header.frame_id = 'odom'
-        odom_trans.child_frame_id = 'world'
+        odom_trans.header.frame_id = 'odom1'
+        odom_trans.child_frame_id = 'robot1/LINK_1'
         joint_state = JointState()
         now = self.get_clock().now()
         joint_state.header.stamp = now.to_msg()
