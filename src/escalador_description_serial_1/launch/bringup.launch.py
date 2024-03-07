@@ -50,12 +50,14 @@ def generate_launch_description():
     robot_description = {"robot_description": robot_description_content}
 
     robot_state_publisher_node = Node(
+        namespace='robot1',
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="both",
         parameters=[robot_description],
     )
     state_publisher = Node(
+        namespace='robot1',
         package="escalador_description_serial_1",
         executable="state_publisher",
         name="state_publisher",
