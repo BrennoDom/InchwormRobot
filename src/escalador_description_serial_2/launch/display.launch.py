@@ -23,10 +23,9 @@ def generate_launch_description():
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[
-            {'robot_description': robot_urdf}
+            {   'frame_prefix' : 'robot2/',
+                'robot_description': robot_urdf}
         ],
-        remappings = [('/tf', 'tf'), 
-              ('/tf_static', 'tf_static')]
  
     )
     joint_state_publisher_node = Node(
@@ -36,9 +35,17 @@ def generate_launch_description():
         name='joint_state_publisher'
     )
 
+    joint_state_publisher_gui_node = Node(
+        namespace='robot2',
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
+        name='joint_state_publisher_gui'
+    )
+
 
     return LaunchDescription([
         
         robot_state_publisher_node,
-        joint_state_publisher_node
+        joint_state_publisher_node,
+        joint_state_publisher_gui_node
     ])

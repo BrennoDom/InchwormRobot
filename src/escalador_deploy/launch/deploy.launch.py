@@ -37,5 +37,6 @@ def generate_launch_description():
     return LaunchDescription([
         service,
         gui_arg,
-        rviz_node
+        rviz_node,
+        
     ])

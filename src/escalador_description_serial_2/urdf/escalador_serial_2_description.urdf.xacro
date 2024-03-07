@@ -1,52 +1,55 @@
-<robot name="escalador_serial_1" version="1.0">
-  <link name="base_link_dummy"/>
-    <joint name="dummy_joint" type="fixed">
-    <parent link="base_link_dummy"/>
-    <child link="LINK_1"/>
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="robot2" params="parent prefix *origin">
+    <joint name="${prefix}base_joint" type="fixed">
+    <xacro:insert_block name="origin" />
+    <parent link="${parent}"/>
+    <child link="${prefix}LINK_1" />
   </joint>
+
   <joint name="J1" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-0.00000 -0.00000 3.14159" xyz="0.00000 -0.00000 0.07100"/>
-    <parent link="LINK_1"/>
-    <child link="LINK_2"/>
+    <parent link="${prefix}LINK_1"/>
+    <child link="${prefix}LINK_2"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J2" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-1.57080 0.00000 -3.14159" xyz="0.00000 0.00000 0.10900"/>
-    <parent link="LINK_2"/>
-    <child link="LINK_3"/>
+    <parent link="${prefix}LINK_2"/>
+    <child link="${prefix}LINK_3"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J3" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-0.00000 0.00000 0.00000" xyz="0.00000 -0.20000 0.00000"/>
-    <parent link="LINK_3"/>
-    <child link="LINK_4"/>
+    <parent link="${prefix}LINK_3"/>
+    <child link="${prefix}LINK_4"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J4" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 0.00000 0.00000" xyz="-0.00000 -0.13800 -0.00000"/>
-    <parent link="LINK_4"/>
-    <child link="LINK_5"/>
+    <parent link="${prefix}LINK_4"/>
+    <child link="${prefix}LINK_5"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J5" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00000 0.00000 0.06200"/>
-    <parent link="LINK_5"/>
-    <child link="LINK_6"/>
+    <parent link="${prefix}LINK_5"/>
+    <child link="${prefix}LINK_6"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J6" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 0.00000 0.00000" xyz="-0.00000 -0.10900 -0.00000"/>
-    <parent link="LINK_6"/>
-    <child link="LINK_7"/>
+    <parent link="${prefix}LINK_6"/>
+    <child link="${prefix}LINK_7"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
-  <link name="LINK_1">
+  <link name="${prefix}LINK_1">
     <collision name="LINK_1_collision">
       <origin rpy="0.00000 0.00000 0.00000" xyz="0.01529 -0.00000 0.03544"/>
       <geometry>
@@ -66,7 +69,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_2">
+  <link name="${prefix}LINK_2">
     <collision name="LINK_2_collision">
       <origin rpy="1.57080 -0.00000 0.00000" xyz="0.00000 0.00606 0.05094"/>
       <geometry>
@@ -86,7 +89,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_3">
+  <link name="${prefix}LINK_3">
     <collision name="LINK_3_collision">
       <origin rpy="0.00000 0.00000 3.13973" xyz="0.00013 -0.10084 0.00235"/>
       <geometry>
@@ -106,7 +109,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_4">
+  <link name="${prefix}LINK_4">
     <collision name="LINK_4_collision">
       <origin rpy="-0.00000 -0.00000 0.02402" xyz="-0.00013 -0.07778 0.00292"/>
       <geometry>
@@ -126,7 +129,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_5">
+  <link name="${prefix}LINK_5">
     <collision name="LINK_5_collision">
       <origin rpy="-1.57080 0.00509 0.00000" xyz="-0.00008 0.00105 0.03565"/>
       <geometry>
@@ -146,7 +149,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_6">
+  <link name="${prefix}LINK_6">
     <collision name="LINK_6_collision">
       <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00004 -0.06277 -0.01268"/>
       <geometry>
@@ -166,7 +169,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="LINK_7">
+  <link name="${prefix}LINK_7">
     <collision name="LINK_7_collision">
       <origin rpy="3.14159 -0.00000 3.14159" xyz="-0.01628 0.00000 0.03790"/>
       <geometry>
@@ -193,4 +196,5 @@
   <material name="SILVER">
     <color rgba="0.80000 0.80000 0.80000 1.00000"/>
   </material>
+  </xacro:macro>
 </robot>

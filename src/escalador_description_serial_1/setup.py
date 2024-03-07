@@ -26,6 +26,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'state_publisher = escalador_description_serial_1.state_publisher:main'
         ],
     },
 )
