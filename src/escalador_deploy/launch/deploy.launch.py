@@ -32,11 +32,20 @@ def generate_launch_description():
             executable='service',
             name='servicecaller'
         )
+    
+    state_publisher = Node(
+            package='escalador_deploy',
+            executable='state_publisher',
+            name="state_publisher",
+            output="screen"
+            
+        )
 
 
     return LaunchDescription([
         service,
         gui_arg,
         rviz_node,
+        state_publisher
         
     ])

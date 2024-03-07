@@ -20,7 +20,9 @@
   <exec_depend>xacro</exec_depend>
 
   <depend>hardware_interface</depend>
-
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

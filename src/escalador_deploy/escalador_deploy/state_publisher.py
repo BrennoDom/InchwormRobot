@@ -25,14 +25,11 @@ class StatePublisher(Node):
         J1 = 0.
         J2 = 0.
         J3 = 0.
-        J4 = 90.
+        J4 = 50.
         J5 = 0.
         J6 = 0.0
 
         # message declarations
-        odom_trans = TransformStamped()
-        odom_trans.header.frame_id = 'odom'
-        odom_trans.child_frame_id = 'world'
         joint_state = JointState()
 
         try:
@@ -45,18 +42,8 @@ class StatePublisher(Node):
                 joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
                 joint_state.position = [J1, J2, J3, J4, J5, J6]
 
-                # update transform
-                # (moving in a circle with radius=2)
-                odom_trans.header.stamp = now.to_msg()
-                odom_trans.transform.translation.x = 0.0
-                odom_trans.transform.translation.y = 0.0
-                odom_trans.transform.translation.z = 0.0
-                odom_trans.transform.rotation = \
-                    euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
-
                 # send the joint state and transform
                 self.joint_pub.publish(joint_state)
-                self.broadcaster.sendTransform(odom_trans)
 
 
                 # This will adjust as needed per iteration
