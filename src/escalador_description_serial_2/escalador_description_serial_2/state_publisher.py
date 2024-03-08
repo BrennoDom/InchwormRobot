@@ -61,7 +61,7 @@ class StatePublisher(Node):
         odom_trans.transform.translation.y = 0.0
         odom_trans.transform.translation.z = 0.0
         odom_trans.transform.rotation = \
-        euler_to_quaternion(0, 3.14, 0) # roll,pitch,yaw
+        euler_to_quaternion(0.0, 3.14, 0.0) # roll,pitch,yaw
 
                 # send the joint state and transform
         self.joint_pub.publish(joint_state)
