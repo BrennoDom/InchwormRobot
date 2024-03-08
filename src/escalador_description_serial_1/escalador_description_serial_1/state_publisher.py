@@ -1,5 +1,6 @@
 from math import sin, cos, pi
 import rclpy
+from std_msgs.msg import String
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 from geometry_msgs.msg import Quaternion
@@ -48,8 +49,8 @@ class StatePublisher(Node):
 
     def publish_joint(self):
         odom_trans = TransformStamped()
-        odom_trans.header.frame_id = 'robot1/end-effector'
-        odom_trans.child_frame_id = 'robot2/LINK_7'
+        odom_trans.header.frame_id = 'robot1/LINK_1'
+        odom_trans.child_frame_id = 'robot2/dummy_base'
         joint_state = JointState()
         now = self.get_clock().now()
         joint_state.header.stamp = now.to_msg()

@@ -8,7 +8,7 @@ class ChangeBaseClient(Node):
 
     def __init__(self):
         super().__init__('chbase_client_async')
-        self.cli = self.create_client(ChangeBase, 'ChangeBase')       # CHANGE
+        self.cli = self.create_client(ChangeBase, 'SrvChangeBase')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = ChangeBase.Request()                                   # CHANGE

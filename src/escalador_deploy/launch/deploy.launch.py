@@ -26,12 +26,6 @@ def generate_launch_description():
         arguments=['-d', rviz_config_file],
         output='screen'
     )
-
-    service = Node(
-            package='service_change_base',
-            executable='service',
-            name='servicecaller'
-        )
     
     state_publisher = Node(
             package='escalador_deploy',
@@ -43,7 +37,6 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        service,
         gui_arg,
         rviz_node,
         state_publisher

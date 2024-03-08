@@ -20,7 +20,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'service = service_change_base.changeserver:main',
             'client = service_change_base.changeclient:main',
         ],
     },
