@@ -1,9 +1,16 @@
 
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <sstream>
 #include <string>
 
+#include <kdl/rigidbodyinertia.hpp>
+#include <kdl/chain.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/chainiksolverpos_lma.hpp>
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
@@ -13,74 +20,90 @@
 
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <kdl/chainiksolverpos_lma.hpp>
-#include <kdl_parser/kdl_parser.hpp>
 
-#define sqr(x) ((x)*(x))
-class FramePublisher : public rclcpp::Node
+const double PI = 3.14159;
+
+
+using namespace std::chrono_literals;
+
+unsigned int v = 2;
+
+class IKSolver: public rclcpp::Node
 {
-public:
-  FramePublisher()
-  : Node("turtle_tf2_frame_publisher")
-  {
-    // Declare and acquire `turtlename` parameter
-    turtlename_ = this->declare_parameter<std::string>("turtlename", "turtle");
+	using joint_vector_t = Eigen::Vector<double, 6>;
+ 	using cartesian_vector_t = Eigen::Vector<double, 6>;
+	public:
+		IKSolver(void);
+		~IKSolver(void);
 
-    // Initialize the transform broadcaster
-    tf_broadcaster_ =
-      std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+	private:
+		rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr Inversepub;
 
-    // Subscribe to a turtle{1}{2}/pose topic and call handle_turtle_pose
-    // callback function on each message
-    std::ostringstream stream;
-    stream << "/" << turtlename_.c_str() << "/pose";
-    std::string topic_name = stream.str();
+		KDL::Frame goal_;
+		KDL::Chain chain_;
+		KDL::ChainIkSolverPos_LMA *ikSolverPos_;
+		KDL::JntArray q_;
+		std::string robotDescription_;
+		std::unique_ptr<KDL::ChainJntToJacSolver> jacobian_solver_;
+  		KDL::Jacobian jacobian_;
 
-    subscription_ = this->create_subscription<turtlesim::msg::Pose>(
-      topic_name, 10,
-      std::bind(&FramePublisher::handle_turtle_pose, this, std::placeholders::_1));
-  }
 
-private:
-  void handle_turtle_pose(const std::shared_ptr<turtlesim::msg::Pose> msg)
-  {
-    geometry_msgs::msg::TransformStamped t;
-
-    // Read message content and assign it to
-    // corresponding tf variables
-    t.header.stamp = this->get_clock()->now();
-    t.header.frame_id = "world";
-    t.child_frame_id = turtlename_.c_str();
-
-    // Turtle only exists in 2D, thus we get x and y translation
-    // coordinates from the message and set the z coordinate to 0
-    t.transform.translation.x = msg->x;
-    t.transform.translation.y = msg->y;
-    t.transform.translation.z = 0.0;
-
-    // For the same reason, turtle can only rotate around one axis
-    // and this why we set rotation in x and y to 0 and obtain
-    // rotation in z axis from the message
-    tf2::Quaternion q;
-    q.setRPY(0, 0, msg->theta);
-    t.transform.rotation.x = q.x();
-    t.transform.rotation.y = q.y();
-    t.transform.rotation.z = q.z();
-    t.transform.rotation.w = q.w();
-
-    // Send the transformation
-    tf_broadcaster_->sendTransform(t);
-  }
-
-  rclcpp::Subscription<turtlesim::msg::Pose>::SharedPtr subscription_;
-  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
-  std::string turtlename_;
+		void robotDescriptionCB(const std_msgs::msg::String::SharedPtr robotDescription);
 };
 
-int main(int argc, char * argv[])
+IKSolver::IKSolver(void): Node("ik_kinematics_node"), q_(2)
 {
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<FramePublisher>());
-  rclcpp::shutdown();
-  return 0;
+	Inversepub=create_publisher<std_msgs::msg::Float64>("inverse_controller/command",100);
+	
+	rclcpp::QoS qos(rclcpp::KeepLast(1));
+	qos.transient_local();
+	auto robotDescriptionSubscriber_=create_subscription<std_msgs::msg::String>("robot_description",qos,std::bind(&IKSolver::robotDescriptionCB,this,std::placeholders::_1));
+	while(robotDescription_.empty())
+	{
+                RCLCPP_WARN_STREAM_SKIPFIRST_THROTTLE(get_logger(),*get_clock(),1000,"Waiting for robot model on /robot_description.");
+                rclcpp::spin_some(get_node_base_interface());
+	}
+
+	KDL::Tree tree;
+	if (!kdl_parser::treeFromString(robotDescription_,tree))
+		RCLCPP_ERROR_STREAM(get_logger(),"Failed to construct KDL tree.");
+		
+	if (!tree.getChain("world","robot1/end-effector",chain_))
+		RCLCPP_ERROR_STREAM(get_logger(),"Failed to get chain from KDL tree.");
+	
+
+	
+	jacobian_solver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
+    jacobian_.resize(chain_.getNrOfJoints());
+	q_.resize(chain_.getNrOfJoints());
+
+	jacobian_solver_->JntToJac(q_, jacobian_);
+	
+	Eigen::Matrix<double,6,1> L;
+	L << 1.0 , 1.0 , 1.0, 0.01, 0.01, 0.01;
+	
+	// A copy of chain_ is not created inside!
+	ikSolverPos_=new KDL::ChainIkSolverPos_LMA(chain_,L);
+	auto teste = chain_.getSegment(1).getInertia();
+	RCLCPP_INFO_STREAM(get_logger(),jacobian_.data);
+	ikSolverPos_->display_information=false;
+}
+
+
+IKSolver::~IKSolver(void)
+{
+	delete ikSolverPos_;
+}
+
+void IKSolver::robotDescriptionCB(const std_msgs::msg::String::SharedPtr robotDescription)
+{
+	robotDescription_=robotDescription->data;
+}
+
+int main(int argc,char* argv[])
+{
+	rclcpp::init(argc,argv);
+	rclcpp::spin(std::make_shared<IKSolver>());
+	rclcpp::shutdown();
+	return 0;
 }

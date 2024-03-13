@@ -48,27 +48,26 @@ class StatePublisher(Node):
        self.J6 = msg.position[5]
 
     def publish_joint(self):
-        odom_trans = TransformStamped()
-        odom_trans.header.frame_id = 'robot1/LINK_1'
-        odom_trans.child_frame_id = 'robot2/dummy_base'
+        #odom_trans = TransformStamped()
+        #odom_trans.header.frame_id = 'robot1/LINK_1'
+        #odom_trans.child_frame_id = 'robot2/dummy_base'
         joint_state = JointState()
         now = self.get_clock().now()
         joint_state.header.stamp = now.to_msg()
         joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
         joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
 
-        # update transform
-        # (moving in a circle with radius=2)
-        odom_trans.header.stamp = now.to_msg()
-        odom_trans.transform.translation.x = 0.0
-        odom_trans.transform.translation.y = 0.0
-        odom_trans.transform.translation.z = 0.0
-        odom_trans.transform.rotation = \
-        euler_to_quaternion(0, 3.14, 0) # roll,pitch,yaw
+        # odometria
+    #    odom_trans.header.stamp = now.to_msg()
+    #    odom_trans.transform.translation.x = 0.0
+    #    odom_trans.transform.translation.y = 0.0
+    #    odom_trans.transform.translation.z = 0.0
+    #    odom_trans.transform.rotation = \
+    #    euler_to_quaternion(0, 0, 0) 
 
-                # send the joint state and transform
+    
         self.joint_pub.publish(joint_state)
-        self.broadcaster.sendTransform(odom_trans)
+    #    self.broadcaster.sendTransform(odom_trans)
 
 def euler_to_quaternion(roll, pitch, yaw):
     qx = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2)

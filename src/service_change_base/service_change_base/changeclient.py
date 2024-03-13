@@ -1,4 +1,4 @@
-from escalador_interfaces.srv import ChangeBase                                                           # CHANGE
+from escalador_interfaces.srv import ChangeBase                                                           
 import sys
 import rclpy
 from rclpy.node import Node
@@ -8,10 +8,10 @@ class ChangeBaseClient(Node):
 
     def __init__(self):
         super().__init__('chbase_client_async')
-        self.cli = self.create_client(ChangeBase, 'SrvChangeBase')       # CHANGE
+        self.cli = self.create_client(ChangeBase, 'SrvChangeBase')       
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
-        self.req = ChangeBase.Request()                                   # CHANGE
+        self.req = ChangeBase.Request()                                   
 
     def send_request(self):
         self.req.change = sys.argv[1] == 'True'

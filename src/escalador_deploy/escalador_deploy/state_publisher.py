@@ -1,10 +1,12 @@
 from math import sin, cos, pi
+import math
 import rclpy
 from std_msgs.msg import String
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
+import tf2_ros
 from tf2_ros import TransformBroadcaster, TransformStamped
 from escalador_interfaces.srv import ChangeBase
 
@@ -15,13 +17,13 @@ class StatePublisher(Node):
     RobotURDF1 =''
     RobotURDF2 =''
     degree = pi / 180.0
-    Base = 0
-    J1 = 0.0 * degree
+    Base = 1
+    J1 = 30.0 * degree
     J2 = 60.0 * degree
     J3 = 60.0 * degree
-    J4 = 0.0 * degree
+    J4 = 40.0 * degree
     J5 = 60.0 * degree
-    J6 = 0.0 * degree
+    J6 = 30.0 * degree
 
     def __init__(self):
         super().__init__('state_publisher')
@@ -37,7 +39,9 @@ class StatePublisher(Node):
         self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
         self.nodeName = self.get_name()
         self.get_logger().info("{0} started".format(self.nodeName))
-        
+       
+        self.buffertf = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.buffertf,self)
 
         
 
@@ -77,15 +81,25 @@ class StatePublisher(Node):
     def publish_joint(self):
         
         odom_trans = TransformStamped()
+   
+
+        #odom_base_2 = self.buffertf.lookup_transform('robot2/LINK_1','robot2/LINK_7',rclpy.time.Time())
+        #self.get_logger().info('%s' % (odom_base_2)) 
+
 
         now = self.get_clock().now()
         joint_state = JointState()
         joint_state.header.stamp = now.to_msg()
+        odom_base_1 = self.buffertf.lookup_transform('robot1/LINK_1','robot1/end-effector',rclpy.time.Time())
+        odom_base_2 = self.buffertf.lookup_transform('robot2/LINK_7','robot2/end-effector',rclpy.time.Time())
+        #self.get_logger().info('%s' % (odom_base_1)) 
         joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
         joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
         match self.Base:
             case 0:
-                odom_trans.header.frame_id = 'world'
+
+
+                odom_trans.header.frame_id = 'odom'
                 odom_trans.child_frame_id = 'robot1/LINK_1'
 
 
@@ -98,16 +112,19 @@ class StatePublisher(Node):
                 euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
 
             case 1:
-                odom_trans.header.frame_id = 'world'
-                odom_trans.child_frame_id = 'robot2/LINK_7'
 
+
+                odom_trans.header.frame_id = 'odom'
+                odom_trans.child_frame_id = 'robot2/LINK_7'
+                
                 odom_trans.header.stamp = now.to_msg()
-                odom_trans.transform.translation.x = 0.0
-                odom_trans.transform.translation.y = 0.0
-                odom_trans.transform.translation.z = 0.0
+                odom_trans.transform.translation = odom_base_1.transform.translation
+                angles = euler_from_quaternion(odom_base_1.transform.rotation.x,odom_base_1.transform.rotation.y,odom_base_1.transform.rotation.z,odom_base_1.transform.rotation.w)
                 odom_trans.transform.rotation = \
-                euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
-            
+                euler_to_quaternion(-angles[0], angles[1]+3.14, angles[2]) # roll,pitch,yaw
+        
+       # odom_base_1 = self.buffertf.lookup_transform('robot1/LINK_7','robot2/dummy_base',rclpy.time.Time())
+        #self.get_logger().info('%s' % ()) 
         self.joint_pub.publish(joint_state)
         self.broadcaster.sendTransform(odom_trans)
 
@@ -122,6 +139,22 @@ def euler_to_quaternion(roll, pitch, yaw):
     qz = cos(roll/2) * cos(pitch/2) * sin(yaw/2) - sin(roll/2) * sin(pitch/2) * cos(yaw/2)
     qw = cos(roll/2) * cos(pitch/2) * cos(yaw/2) + sin(roll/2) * sin(pitch/2) * sin(yaw/2)
     return Quaternion(x=qx, y=qy, z=qz, w=qw)
+def euler_from_quaternion(x, y, z, w):
+        
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll_x = math.atan2(t0, t1)
+     
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch_y = math.asin(t2)
+     
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw_z = math.atan2(t3, t4)
+     
+        return roll_x, pitch_y, yaw_z
 
 def main(args=None):
     rclpy.init(args=args)

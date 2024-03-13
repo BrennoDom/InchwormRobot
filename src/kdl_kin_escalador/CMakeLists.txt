@@ -20,10 +20,11 @@ find_package(urdf REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(kdl_kin_escalador src/ik_kinematics_node.cpp)
-target_include_directories(kdl_kin_escalador PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)
+add_executable(invKin src/ik_kinematics_node.cpp)
+#target_include_directories(kdl_kin_escalador PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)
 #target_compile_features(kdl_kin_escalador c_std_99 cxx_std_17)  
-ament_target_dependencies(kdl_kin_escalador 
+ament_target_dependencies(
+invKin 
 tf2
 tf2_ros
 rclcpp
@@ -34,6 +35,9 @@ sensor_msgs
 std_msgs
 urdf
 )
+install(TARGETS
+  invKin
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

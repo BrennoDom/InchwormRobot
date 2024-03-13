@@ -10,7 +10,7 @@
   <link name="${prefix}end-effector"/>
   <link name="${prefix}dummy_base"/>
   <joint name="dummy" type="fixed">
-    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.07100"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     <parent link="${prefix}LINK_1"/>
     <child link="${prefix}dummy_base"/>
   </joint>
