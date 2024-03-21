@@ -28,10 +28,10 @@ class StatePublisher(Node):
     degree = pi / 180.0
     Base = Int8()
     J1 = 0.0 * degree
-    J2 = 0.0 * degree
-    J3 = 0.0 * degree
+    J2 = 30.0 * degree
+    J3 = 30.0 * degree
     J4 = 0.0 * degree
-    J5 = 0.0 * degree
+    J5 = 30.0 * degree
     J6 = 0.0 * degree
 
     def __init__(self):
@@ -39,7 +39,7 @@ class StatePublisher(Node):
 
         qos_profile = QoSProfile(depth=10)
         qos_profile_URDF = QoSProfile(durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,depth=1)
-        self.create_subscription(Int32MultiArray,'/set_joints',self.joint_callback,qos_profile)
+        #self.create_subscription(Int32MultiArray,'/set_joints',self.joint_callback,qos_profile)
         self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
         self.create_subscription(String,'robot1/robot_description',self.robot1_callback,qos_profile_URDF)
         self.create_subscription(String,'robot2/robot_description',self.robot2_callback,qos_profile_URDF)
@@ -107,7 +107,7 @@ class StatePublisher(Node):
         joint_state = JointState()
         joint_state.header.stamp = now.to_msg()
         joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
-        joint_state.position = [0.0, 1.5, self.J3, self.J4, self.J5, self.J6]
+        joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
 
         odom_trans.header.frame_id = 'odom_J3'
         odom_trans.child_frame_id = 'actual_odom'
@@ -118,7 +118,7 @@ class StatePublisher(Node):
         odom_trans.transform.translation.z = 0.0
         odom_trans.transform.rotation = \
         euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
-        self.joint_pub.publish(joint_state)
+       # self.joint_pub.publish(joint_state)
         self.base_pub.publish(self.Base)
 
         self.broadcaster.sendTransform(odom_trans)
