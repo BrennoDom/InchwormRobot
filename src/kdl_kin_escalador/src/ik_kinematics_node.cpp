@@ -28,6 +28,7 @@
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/int32_multi_array.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 
 const double PI = 3.14159;
 
@@ -65,7 +66,10 @@ class IKSolver: public rclcpp::Node
 	public:
 	
 		IKSolver();
+		void publisher();
 	private:
+
+		
 		void robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg);
 		rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr robotActualRobot;
 
@@ -73,87 +77,52 @@ class IKSolver: public rclcpp::Node
 		KDL::Chain chain_;
 		KDL::ChainIkSolverPos_LMA *ikSolverPos_;
 		KDL::JntArray q_;
+
+		joint_vector_t dq_;
 		
 		std::unique_ptr<KDL::ChainJntToJacSolver> jacobian_solver_;
   		KDL::Jacobian jacobian_;
 		int actualBase_;
 		std::string robotDescription_;
 		void robotDescriptionCB(const std_msgs::msg::String::SharedPtr robotDescription);
+		
 		rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robotDescriptionSubscriber_;
-
+		
 		std::string linkSource;
 		std::string linkEnd;
+		rclcpp::TimerBase::SharedPtr timer_;
+		rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr robotJointPub;
 		
-
+		
+		
 };
 
 IKSolver::IKSolver(): Node("ik_kinematics_node")
 {
 
-	robotActualRobot = this->create_subscription<std_msgs::msg::Int8>(
-    "act_base", 10, std::bind(&IKSolver::robotBaseCallback, this, std::placeholders::_1));
+
 	
 	rclcpp::QoS qos(rclcpp::KeepLast(1));
 	qos.transient_local();
 
+
+	
+	robotActualRobot = this->create_subscription<std_msgs::msg::Int8>(
+    "act_base", 10, std::bind(&IKSolver::robotBaseCallback, this, std::placeholders::_1));
+
 	robotDescriptionSubscriber_= this->create_subscription<std_msgs::msg::String>("robot_description",qos,std::bind(&IKSolver::robotDescriptionCB,this,std::placeholders::_1));
-	
-	
-	while(1){
-		while((robotDescription_.empty())&& (actualBase_ == NULL))
-			{
-						RCLCPP_WARN_STREAM_SKIPFIRST_THROTTLE(get_logger(),*get_clock(),1000,"Waiting for robot model on /robot_description.");
-						rclcpp::spin_some(get_node_base_interface());
-			}
-			switch(actualBase_){
 
-				case 0:
-						RCLCPP_INFO(this->get_logger(), "actualBase_: '%d'", actualBase_);
-						linkSource = "robot1/LINK_1";
-						linkEnd = "robot1/end-effector";
-					break;
-				case 1:
-						RCLCPP_INFO(this->get_logger(), "actualBase_: '%d'", actualBase_);
-						std::cout <<actualBase_;
-						linkSource = "robot2/LINK_7";
-						linkEnd = "robot2/end-effector";
-					
-				
-			}
 
-		KDL::Tree tree;
-		if (!kdl_parser::treeFromString(robotDescription_,tree))
-			RCLCPP_ERROR_STREAM(get_logger(),"Failed to construct KDL tree.");
-			
-		if ((!tree.getChain(linkSource,linkEnd,chain_)))  {
-			RCLCPP_ERROR_STREAM(get_logger(),"Failed to get chain from KDL tree.");
+
+
+	robotJointPub = this -> create_publisher<sensor_msgs::msg::JointState>(
+	"/joint_states", 10);
+
+	timer_ = this->create_wall_timer(
+      100ms, std::bind(&IKSolver::publisher, this));
+
+
 		
-		}
-		
-		jacobian_solver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
-		jacobian_.resize(chain_.getNrOfJoints());
-		q_.resize(chain_.getNrOfJoints());
-
-		jacobian_solver_->JntToJac(q_, jacobian_);
-		
-		Eigen::Matrix<double,6,1> dxe_;
-		dxe_ << 0.1 , 0.0 , 0.0, 0.0, 0.0, 0.0;
-		Eigen::Matrix<double,6,1> L;
-		L << 1.0 , 1.0 , 1.0, 0.01, 0.01, 0.01;
-		
-
-		// A copy of chain_ is not created inside!
-		
-		ikSolverPos_=new KDL::ChainIkSolverPos_LMA(chain_,L);
-		Eigen::Matrix<double,6,6>  inverseJac = pinv(jacobian_.data);
-
-
-		joint_vector_t dq_ = inverseJac * dxe_;
-		RCLCPP_INFO_STREAM(get_logger(),dq_);
-		ikSolverPos_->display_information=false;
-
-		rclcpp::spin_some(get_node_base_interface());
-	}
 	
 
 
@@ -161,12 +130,79 @@ IKSolver::IKSolver(): Node("ik_kinematics_node")
 }
 
 
+void IKSolver::publisher()
+{
 
+	while(robotDescription_.empty())
+		{
+                   RCLCPP_WARN_STREAM_SKIPFIRST_THROTTLE(get_logger(),*get_clock(),1000,"Waiting for robot model on /robot_description.");
+                   rclcpp::spin_some(get_node_base_interface());
+	}
+
+	switch(actualBase_){
+
+		case 0:
+				RCLCPP_INFO(this->get_logger(), "actualBase_: '%d'", actualBase_);
+				linkSource = "robot1/LINK_1";
+				linkEnd = "robot1/end-effector";
+			break;
+		case 1:
+				RCLCPP_INFO(this->get_logger(), "actualBase_: '%d'", actualBase_);
+				std::cout <<actualBase_;
+				linkSource = "robot2/LINK_7";
+				linkEnd = "robot2/end-effector";
+				
+			
+		}
+
+	KDL::Tree tree;
+	if (!kdl_parser::treeFromString(robotDescription_,tree))
+		RCLCPP_ERROR_STREAM(get_logger(),"Failed to construct KDL tree.");
+		
+	if ((!tree.getChain(linkSource,linkEnd,chain_)))  {
+		RCLCPP_ERROR_STREAM(get_logger(),"Failed to get chain from KDL tree.");
+	
+	}
+	
+	jacobian_solver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
+	jacobian_.resize(chain_.getNrOfJoints());
+	q_.resize(chain_.getNrOfJoints());
+
+	jacobian_solver_->JntToJac(q_, jacobian_);
+	
+	Eigen::Matrix<double,6,1> dxe_;
+	dxe_ << 0.0 , 0.0 , 10.0, 0.0, 0.0, 0.0;
+	Eigen::Matrix<double,6,1> L;
+	L << 1.0 , 1.0 , 1.0, 0.01, 0.01, 0.01;
+	Eigen::Matrix<double,6,1> q_Next;
+	q_Next << 0.0 , 0.0 , 0.0, 0.0, 0.0, 0.0;
+	
+
+	// A copy of chain_ is not created inside!
+	
+	ikSolverPos_=new KDL::ChainIkSolverPos_LMA(chain_,L);
+	Eigen::Matrix<double,6,6>  inverseJac = pinv(jacobian_.data);
+
+
+	joint_vector_t dq_ = inverseJac * dxe_;
+	
+	ikSolverPos_->display_information=false;
+
+	q_Next = q_.data + dq_*0.100;
+	RCLCPP_INFO_STREAM(get_logger(),q_.data);
+	auto jointStates_ = sensor_msgs::msg::JointState();
+	jointStates_.header.stamp = rclcpp::Node::get_clock() -> now();
+	jointStates_.name = {"J1","J2","J3","J4","J5","J6"};
+	jointStates_.velocity= {dq_[0],dq_[1],dq_[2],dq_[3],dq_[4],dq_[5]};
+	jointStates_.position= {0.0,q_Next[1],q_Next[2],q_Next[3],q_Next[4],q_Next[5]};
+	//robotJointPub -> publish(jointStates_);
+}
 void IKSolver::robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg)
 {
 
 	RCLCPP_INFO(this->get_logger(), "I heard: '%d'", msg->data);
 	actualBase_ = msg->data;
+	
 }
 
 void IKSolver::robotDescriptionCB(const std_msgs::msg::String::SharedPtr robotDescription)
@@ -174,18 +210,6 @@ void IKSolver::robotDescriptionCB(const std_msgs::msg::String::SharedPtr robotDe
 	RCLCPP_INFO(this->get_logger(), "ok", robotDescription->data);
 	robotDescription_=robotDescription->data;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

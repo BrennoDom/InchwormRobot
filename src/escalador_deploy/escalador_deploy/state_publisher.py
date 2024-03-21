@@ -107,7 +107,7 @@ class StatePublisher(Node):
         joint_state = JointState()
         joint_state.header.stamp = now.to_msg()
         joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
-        joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
+        joint_state.position = [0.0, 1.5, self.J3, self.J4, self.J5, self.J6]
 
         odom_trans.header.frame_id = 'odom_J3'
         odom_trans.child_frame_id = 'actual_odom'
