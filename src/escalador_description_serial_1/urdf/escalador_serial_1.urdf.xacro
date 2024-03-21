@@ -12,9 +12,9 @@ https://github.com/ros-simulation/gazebo_ros_demos/blob/kinetic-devel/rrbot_desc
 
   <xacro:include filename="$(find escalador_description_serial_1)/urdf/escalador_serial_1_control.xacro" />
 
-  <link name="world"/>
+  <link name="odom1"/>
 
-  <xacro:robot1 parent="world" prefix="$(arg prefix)">
+  <xacro:robot1 parent="odom1" prefix="$(arg prefix)">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:robot1>
 
