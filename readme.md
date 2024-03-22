@@ -1,4 +1,5 @@
-This, is the official workspace for "Escalador" Project. This place will be TODO list for the project
+This, is the official workspace for "Escalador" Project. This place will be TODO list for the project.
+To compile, you must have ROS2 humble installed on PC.
 
 
 
