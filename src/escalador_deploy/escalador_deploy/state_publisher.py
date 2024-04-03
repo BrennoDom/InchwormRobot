@@ -33,6 +33,8 @@ class StatePublisher(Node):
     J4 = 0.0 * degree
     J5 = 30.0 * degree
     J6 = 0.0 * degree
+    flaginit = False
+    i = 0
 
     def __init__(self):
         super().__init__('state_publisher')
@@ -45,7 +47,7 @@ class StatePublisher(Node):
         self.create_subscription(String,'robot2/robot_description',self.robot2_callback,qos_profile_URDF)
         self.robot_pub = self.create_publisher(String, 'robot_description', qos_profile_URDF)
         self.base_pub = self.create_publisher(Int8, 'act_base', 10)
-        self.timer_ = self.create_timer(0.1, self.publish_joint)
+        self.timer_ = self.create_timer(0.03, self.publish_joint)
         self.create_service(ChangeBase,'SrvChangeBase',self.ChangeBaseCallback)
         self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
         self.nodeName = self.get_name()
@@ -53,6 +55,7 @@ class StatePublisher(Node):
        
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
+        
 
     
 
@@ -94,7 +97,8 @@ class StatePublisher(Node):
             response.basename = 'Base 1'
             self.PrefixTopic = 'robot2'
             self.Base.data = 1
-        self.get_logger().info('Incoming request\n%s' % (request.change))  
+            self.get_logger().info('Incoming request\n%s' % (request.change))  
+            
         
         self.robot_pub.publish(string_robot)
 
@@ -105,11 +109,9 @@ class StatePublisher(Node):
         odom_trans = TransformStamped()
         now = self.get_clock().now()
         joint_state = JointState()
-        joint_state.header.stamp = now.to_msg()
-        joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
-        joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
+   
 
-        odom_trans.header.frame_id = 'odom_J3'
+        odom_trans.header.frame_id = 'world'
         odom_trans.child_frame_id = 'actual_odom'
                 
         odom_trans.header.stamp = now.to_msg()
@@ -118,10 +120,21 @@ class StatePublisher(Node):
         odom_trans.transform.translation.z = 0.0
         odom_trans.transform.rotation = \
         euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
-       # self.joint_pub.publish(joint_state)
+
+        #self.joint_pub.publish(joint_state)
         self.base_pub.publish(self.Base)
 
         self.broadcaster.sendTransform(odom_trans)
+        """
+        if self.flaginit is False:
+            
+            joint_state.header.stamp = now.to_msg()
+            joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
+            joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
+            self.joint_pub.publish(joint_state)
+            self.i = self.i+1
+            if self.i == 10:
+                self.flaginit = True"""
        # odom_base_1 = self.buffertf.lookup_transform('robot1/LINK_7','robot2/dummy_base',rclpy.time.Time())
 
 

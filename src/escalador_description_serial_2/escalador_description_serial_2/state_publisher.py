@@ -31,7 +31,7 @@ class StatePublisher(Node):
         self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
         self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
         self.nodeName = self.get_name()
-        self.timer_ = self.create_timer(0.1, self.publish_joint)
+        self.timer_ = self.create_timer(0.03, self.publish_joint)
         self.get_logger().info("{0} started".format(self.nodeName))
 
         self.tf_buffer = Buffer()

@@ -16,6 +16,7 @@
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
 #include <kdl/tree.hpp>
+
 #include <kdl_parser/kdl_parser.hpp>
 
 #include <rclcpp/rclcpp.hpp>
@@ -29,7 +30,9 @@
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/int32_multi_array.hpp>
+#include <std_msgs/msg/float32_multi_array.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+
 
 const double PI = 3.14159;
 
@@ -70,11 +73,20 @@ class IKSolver: public rclcpp::Node
 		void publisher();
 	private:
 
+		Eigen::Matrix<double,6,1> dxe_;
 		
+		bool flagOK;
 		void robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg);
 		void robotJointCallback(const sensor_msgs::msg::JointState::SharedPtr Joints);
+		void VelsCallback(const std_msgs::msg::Int32MultiArray::SharedPtr Vel);
+
+
+		double x, y, z, roll, pitch, yaw;
+		rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr robotEndPub;
+    
 		rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr robotActualJoint;
 		rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr robotActualRobot;
+		rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr robotvelSub;
 
 		KDL::Frame FKkin;
 		KDL::Chain chain_;
@@ -98,7 +110,7 @@ class IKSolver: public rclcpp::Node
 		rclcpp::TimerBase::SharedPtr timer_;
 		rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr robotJointPub;
 		
-		
+    
 		
 };
 
@@ -106,7 +118,7 @@ IKSolver::IKSolver(): Node("ik_kinematics_node")
 {
 
 
-	
+	dxe_ << 0.0,0.0,0.0,0.0,0.0,0.0;
 	rclcpp::QoS qos(rclcpp::KeepLast(1));
 	qos.transient_local();
 
@@ -119,6 +131,12 @@ IKSolver::IKSolver(): Node("ik_kinematics_node")
 
 	robotActualRobot = this->create_subscription<std_msgs::msg::Int8>(
     "act_base", 10, std::bind(&IKSolver::robotBaseCallback, this, std::placeholders::_1));
+
+	robotvelSub = this->create_subscription<std_msgs::msg::Int32MultiArray>(
+	"set_ve", 10, std::bind(&IKSolver::VelsCallback,this, std::placeholders::_1));
+
+	robotEndPub = this->create_publisher<std_msgs::msg::Float32MultiArray>(
+	"end_effector_pos",10);
 
 	robotDescriptionSubscriber_1= this->create_subscription<std_msgs::msg::String>("/robot1/robot_description",qos,std::bind(&IKSolver::robotDescriptionCB1,this,std::placeholders::_1));
 	robotDescriptionSubscriber_2= this->create_subscription<std_msgs::msg::String>("/robot2/robot_description",qos,std::bind(&IKSolver::robotDescriptionCB2,this,std::placeholders::_1));
@@ -133,7 +151,7 @@ IKSolver::IKSolver(): Node("ik_kinematics_node")
 
 
 	timer_ = this->create_wall_timer(
-      100ms, std::bind(&IKSolver::publisher, this));
+      30ms, std::bind(&IKSolver::publisher, this));
 
 
 		
@@ -144,11 +162,53 @@ IKSolver::IKSolver(): Node("ik_kinematics_node")
 }
 
 
-void IKSolver::publisher()
+
+void IKSolver::robotJointCallback(const sensor_msgs::msg::JointState::SharedPtr Joints)
+{
+	act_joints = Joints->position;
+	flagOK = true;
+	
+}
+void IKSolver::VelsCallback(const std_msgs::msg::Int32MultiArray::SharedPtr Vel)
+{
+	dxe_ << Vel->data[0]/1000.0 , Vel->data[1]/1000.0, Vel->data[2]/1000.0, Vel->data[3]/100.0, Vel->data[4]/100.0, Vel->data[5]/100.0;
+	//RCLCPP_INFO_STREAM(get_logger(),dxe_);
+}
+void IKSolver::robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg)
 {
 
+	
+	//RCLCPP_INFO(this->get_logger(), "I heard: '%d'", msg->data);
+	actualBase_ = msg->data;
+	
+}
+
+void IKSolver::robotDescriptionCB1(const std_msgs::msg::String::SharedPtr robotDescription)
+{
+
+//	RCLCPP_INFO(this->get_logger(), "ok", robotDescription->data);
+	robotDescription_1=robotDescription->data;
+}
+
+void IKSolver::robotDescriptionCB2(const std_msgs::msg::String::SharedPtr robotDescription)
+{
+
+//	RCLCPP_INFO(this->get_logger(), "ok", robotDescription->data);
+	robotDescription_2=robotDescription->data;
+}
+void IKSolver::publisher()
+{
+auto jointStates_ = sensor_msgs::msg::JointState();
+auto end_effector_p_R_ = std_msgs::msg::Float32MultiArray();
+
+joint_vector_t dq_;
+Eigen::Matrix<double,6,6>  inverseJac;
+Eigen::Matrix<double,6,1> q_Next;
 KDL::Tree tree;
+
+	
 	switch(actualBase_){
+		
 
 		case 0:
 
@@ -165,6 +225,27 @@ KDL::Tree tree;
 						RCLCPP_ERROR_STREAM(get_logger(),"Failed to get chain from KDL tree.");
 					
 					}
+				jacobian_solver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
+				foward_solver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain_);
+				jacobian_.resize(chain_.getNrOfJoints());
+				q_.resize(chain_.getNrOfJoints());
+				q_(0)=act_joints[0];
+				q_(1)=act_joints[1];
+				q_(2)=act_joints[2];
+				q_(3)=act_joints[3];
+				q_(4)=act_joints[4];
+				q_(5)=act_joints[5];
+				jacobian_solver_->JntToJac(q_, jacobian_);
+				foward_solver_ ->JntToCart(q_,FKkin);
+				inverseJac = pinv(jacobian_.data);
+				dq_ = inverseJac * dxe_;
+				q_Next = q_.data + dq_*0.030;
+				//RCLCPP_INFO_STREAM(get_logger(),q_.data);
+				
+				jointStates_.header.stamp = rclcpp::Node::get_clock() -> now();
+				jointStates_.name = {"J1","J2","J3","J4","J5","J6"};
+				jointStates_.velocity= {dq_[0],dq_[1],dq_[2],dq_[3],dq_[4],dq_[5]};
+				jointStates_.position= {q_Next[0],q_Next[1],q_Next[2],q_Next[3],q_Next[4],q_Next[5]};
 				
 			break;
 		case 1:
@@ -181,38 +262,45 @@ KDL::Tree tree;
 						RCLCPP_ERROR_STREAM(get_logger(),"Failed to get chain from KDL tree.");
 					
 					}
+
+				jacobian_solver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
+				foward_solver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain_);
+				jacobian_.resize(chain_.getNrOfJoints());
+				q_.resize(chain_.getNrOfJoints());
+				q_(0)=act_joints[5];
+				q_(1)=act_joints[4];
+				q_(2)=act_joints[3];
+				q_(3)=act_joints[2];
+				q_(4)=act_joints[1];
+				q_(5)=act_joints[0];
+				jacobian_solver_->JntToJac(q_, jacobian_);
+				foward_solver_ ->JntToCart(q_,FKkin);
+				inverseJac = pinv(jacobian_.data);
+				dq_ = inverseJac * dxe_;
+				q_Next = q_.data + dq_*0.030;
+				//RCLCPP_INFO_STREAM(get_logger(),q_.data);
+				
+				jointStates_.header.stamp = rclcpp::Node::get_clock() -> now();
+				jointStates_.name = {"J1","J2","J3","J4","J5","J6"};
+				jointStates_.velocity= {dq_[5],dq_[4],dq_[3],dq_[2],dq_[1],dq_[0]};
+				jointStates_.position= {q_Next[5],q_Next[4],q_Next[3],q_Next[2],q_Next[1],q_Next[0]};
 			break;
 			
 	}
 
+	x = FKkin.p.x();
+	y = FKkin.p.y();
+	z = FKkin.p.z();
+	FKkin.M.GetEulerZYZ(roll,pitch,yaw);
+	//std::cout << "x:" << x << " y:" << y << " z:" << z << " roll:" << roll << " pitch:" << pitch << " yaw:" << yaw << std::endl;
+	end_effector_p_R_.data = {(float)x,(float)y,(float)z,(float)roll,(float)pitch,(float)yaw};
+	//RCLCPP_INFO(this->get_logger(),end_effector_p_R_);
+	//RCLCPP_INFO_STREAM(get_logger(),end_effector_p_R_.data[0]);
+	robotEndPub -> publish(end_effector_p_R_);
+	robotJointPub -> publish(jointStates_);
 
 	
-	jacobian_solver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
-	foward_solver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain_);
-	jacobian_.resize(chain_.getNrOfJoints());
-	q_.resize(chain_.getNrOfJoints());
-	q_(0)=act_joints[0];
-	q_(1)=act_joints[1];
-	q_(2)=act_joints[2];
-	q_(3)=act_joints[3];
-	q_(4)=act_joints[4];
-	q_(5)=act_joints[5];
-	jacobian_solver_->JntToJac(q_, jacobian_);
-	foward_solver_ ->JntToCart(q_,FKkin);
-	Eigen::Matrix<double,6,1> dxe_;
-	dxe_ << -0.1 , 0.0 , -0.1, 0.0, 0.0, 0.0;
-	Eigen::Matrix<double,6,1> L;
-	L << 1.0 , 1.0 , 1.0, 0.01, 0.01, 0.01;
-	Eigen::Matrix<double,6,1> q_Next;
-	q_Next << 0.0 , 0.0 , 0.0, 0.0, 0.0, 0.0;
 	
-
-	Eigen::Matrix<double,6,6>  inverseJac = pinv(jacobian_.data);
-
-
-	joint_vector_t dq_ = inverseJac * dxe_;
-
-	q_Next = q_.data + dq_*0.100;
 /*	
 	for (int i = 0; i < 4; i++){
 		for (int j = 0; j < 4; j++) {
@@ -224,41 +312,11 @@ KDL::Tree tree;
 		}
 		std::cout << std::endl;
 	}*/
-	RCLCPP_INFO_STREAM(get_logger(),q_.data);
-	auto jointStates_ = sensor_msgs::msg::JointState();
-	jointStates_.header.stamp = rclcpp::Node::get_clock() -> now();
-	jointStates_.name = {"J1","J2","J3","J4","J5","J6"};
-	jointStates_.velocity= {dq_[0],dq_[1],dq_[2],dq_[3],dq_[4],dq_[5]};
-	jointStates_.position= {q_Next[0],q_Next[1],q_Next[2],q_Next[3],q_Next[4],q_Next[5]};
-	robotJointPub -> publish(jointStates_);
-}
-
-void IKSolver::robotJointCallback(const sensor_msgs::msg::JointState::SharedPtr Joints)
-{
-	act_joints = Joints->position;
-}
-void IKSolver::robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg)
-{
 
 	
-	RCLCPP_INFO(this->get_logger(), "I heard: '%d'", msg->data);
-	actualBase_ = msg->data;
 	
 }
 
-void IKSolver::robotDescriptionCB1(const std_msgs::msg::String::SharedPtr robotDescription)
-{
-
-	RCLCPP_INFO(this->get_logger(), "ok", robotDescription->data);
-	robotDescription_1=robotDescription->data;
-}
-
-void IKSolver::robotDescriptionCB2(const std_msgs::msg::String::SharedPtr robotDescription)
-{
-
-	RCLCPP_INFO(this->get_logger(), "ok", robotDescription->data);
-	robotDescription_2=robotDescription->data;
-}
 
 int main(int argc,char* argv[])
 {
