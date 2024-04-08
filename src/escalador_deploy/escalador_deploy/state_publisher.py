@@ -4,8 +4,11 @@ import rclpy
 import sys
 from threading import Thread
 from rclpy.executors import MultiThreadedExecutor
-from std_msgs.msg import String , Int32MultiArray
+from rclpy.action import ActionClient
+from std_msgs.msg import String , Int32MultiArray, Float64MultiArray
 from std_msgs.msg import Int8
+from control_msgs.action import FollowJointTrajectory
+from trajectory_msgs.msg import JointTrajectoryPoint
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from geometry_msgs.msg import Quaternion
@@ -17,7 +20,7 @@ from tf2_ros.transform_listener import TransformListener
 from escalador_interfaces.srv import ChangeBase
 from rqt_gui_py.plugin import Plugin
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel
-
+from builtin_interfaces.msg import Duration
 
 class StatePublisher(Node):
 
@@ -33,6 +36,7 @@ class StatePublisher(Node):
     J4 = 0.0 * degree
     J5 = 30.0 * degree
     J6 = 0.0 * degree
+
     flaginit = False
     i = 0
 
@@ -57,8 +61,6 @@ class StatePublisher(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
         
 
-    
-
         # robot state
 
 
@@ -72,7 +74,7 @@ class StatePublisher(Node):
 
         except KeyboardInterrupt:
             pass
-    
+
     def joint_callback(self, msg):
        #self.get_logger().info(str(msg.position))
        self.position =[0,0,0,0,0,0]
@@ -85,27 +87,29 @@ class StatePublisher(Node):
        self.J6 = msg.data[5]* self.degree
     def ChangeBaseCallback(self,request,response):
 
-        self.flagBase = False
+        self.flagBase = False;
         string_robot = String()
         if request.change is False:
+
             string_robot.data = self.RobotURDF1
             response.basename = 'Base 0'
             self.PrefixTopic = 'robot1'
             self.Base.data = 0
         else:
             string_robot.data = self.RobotURDF2
+
             response.basename = 'Base 1'
             self.PrefixTopic = 'robot2'
             self.Base.data = 1
-            self.get_logger().info('Incoming request\n%s' % (request.change))  
-            
         
+        self.get_logger().info('Incoming request\n%s' % (request.change))  
+            
         self.robot_pub.publish(string_robot)
 
         return response
     
     def publish_joint(self):
-        
+      
         odom_trans = TransformStamped()
         now = self.get_clock().now()
         joint_state = JointState()
@@ -121,25 +125,13 @@ class StatePublisher(Node):
         odom_trans.transform.rotation = \
         euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
 
-        #self.joint_pub.publish(joint_state)
+      #  self.joint_pub.publish(joint_state)
         self.base_pub.publish(self.Base)
 
+
+                        
+
         self.broadcaster.sendTransform(odom_trans)
-        """
-        if self.flaginit is False:
-            
-            joint_state.header.stamp = now.to_msg()
-            joint_state.name = ['J1', 'J2', 'J3','J4', 'J5', 'J6']
-            joint_state.position = [self.J1, self.J2, self.J3, self.J4, self.J5, self.J6]
-            self.joint_pub.publish(joint_state)
-            self.i = self.i+1
-            if self.i == 10:
-                self.flaginit = True"""
-       # odom_base_1 = self.buffertf.lookup_transform('robot1/LINK_7','robot2/dummy_base',rclpy.time.Time())
-
-
-                
-
 
     def robot1_callback(self,msg):
         self.RobotURDF1 = msg.data

@@ -8,10 +8,12 @@ from launch.conditions import IfCondition, UnlessCondition
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch.event_handlers import OnProcessExit
-
+import xacro
 gui = LaunchConfiguration("gui")
 
 def generate_launch_description():
+    package_name = "escalador_deploy"
+    
     share_dir = get_package_share_directory('escalador_deploy')
     rviz_config_file = os.path.join(share_dir, 'config', 'display.rviz')
 
@@ -70,8 +72,8 @@ def generate_launch_description():
     return LaunchDescription([
         state_1,
         rviz_node,
-        state_publisher,
         default_base,
-        state_2
+        state_2,
+        state_publisher
         
     ])

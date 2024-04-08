@@ -10,13 +10,13 @@
   <link name="${prefix}end-effector"/>
   <link name="${prefix}end-dummy"/>
   <joint name="dummy_joint" type="fixed">
-    <origin rpy="0.0 -3.14 0.0" xyz="0.0 0.0 0.0"/>
+    <origin rpy="0.0 -3.14 0.0" xyz="0.0 0.0 0.000"/>
     <parent link="${prefix}end-effector"/>
     <child link="${prefix}end-dummy"/>
   </joint>
  
   <joint name="end_joint" type="fixed">
-    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.07100"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.06900"/>
     <parent link="${prefix}LINK_1"/>
     <child link="${prefix}end-effector"/>
   </joint>
