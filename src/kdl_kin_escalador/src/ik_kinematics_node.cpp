@@ -382,8 +382,8 @@ void IKSolver::publisher()
 		
 		//RCLCPP_INFO(this->get_logger(),end_effector_p_R_);
 		//RCLCPP_INFO_STREAM(get_logger(),end_effector_p_R_.data[0]);
-		robotEndPub -> publish(end_effector_p_R_);
-		//robotvelPub -> publish(veljointPub);
+		robotEndPub -> publish(end_effector_p_R_);  //SIMULATE
+		//robotvelPub -> publish(veljointPub);		//REAL
 		robotJointPub -> publish(jointStates_);
 
 		
