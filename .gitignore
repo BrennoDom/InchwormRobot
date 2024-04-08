@@ -2,4 +2,7 @@ build
 log
 install
 .vscode
+<<<<<<< HEAD
 readme.md
+=======
+>>>>>>> dec9384fd7a6faadc526a2b2ad23bffe96de57e3
