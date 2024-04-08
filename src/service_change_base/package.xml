@@ -3,7 +3,7 @@
 <package format="3">
   <name>service_change_base</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>This Package create a service node with change base function</description>
   <maintainer email="brenno.domingues@sc.senai.br">brennoisi</maintainer>
   <license>TODO: License declaration</license>
 

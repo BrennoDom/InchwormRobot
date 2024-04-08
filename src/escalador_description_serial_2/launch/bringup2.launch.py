@@ -1,7 +1,13 @@
+import os
+import xacro
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+
+
+from ament_index_python.packages import get_package_share_directory
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -9,6 +15,11 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     # Declare arguments
+
+    controller_config = os.path.join(
+        get_package_share_directory(
+            "escalador_description_serial_2"), "controllers", "controllers.yaml"
+    )
     declared_arguments = []
     declared_arguments.append(
         DeclareLaunchArgument(
@@ -49,6 +60,28 @@ def generate_launch_description():
     )
     robot_description = {"robot_description": robot_description_content}
 
+    robot_controller_node = Node(
+        
+	package="controller_manager",
+	executable="ros2_control_node",
+        parameters=[robot_description, controller_config],
+	output="screen",
+    )
+    robot_joint_state_broadcaster = Node(
+    	 
+         package="controller_manager",
+         executable="spawner",
+         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+         output="screen",
+    
+    )
+
+    robot_controller_velocity = Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=["velocity_controller", "-c", "/controller_manager"],
+            output="screen",
+    )
     robot_state_publisher_node = Node(
         namespace='robot2',
         package="robot_state_publisher",
@@ -65,7 +98,10 @@ def generate_launch_description():
     )
     nodes = [
         robot_state_publisher_node,
-        state_publisher
+        state_publisher,
+        robot_controller_node,
+        robot_joint_state_broadcaster,
+        robot_controller_velocity
     ]
 
     return LaunchDescription(declared_arguments + nodes)
