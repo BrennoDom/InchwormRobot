@@ -2,9 +2,9 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
-
-from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node
+
 
 
 def generate_launch_description():
@@ -21,7 +21,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value="escalador_serial_1.urdf.xacro",
+            default_value="escalador_serial_1_gazebo.urdf.xacro",
             description="URDF/XACRO description file with the robot.",
         )
     )
@@ -63,19 +63,19 @@ def generate_launch_description():
         ]
     )
     robot_description = {"robot_description": robot_description_content}
-
+    print(robot_description)
     rviz_config_file = PathJoinSubstitution(
         [FindPackageShare(description_package), "config", "display.rviz"]
     )
 
     joint_state_publisher_node = Node(
-        namespace='robot1',
+        #namespace='robot1',
         package="joint_state_publisher_gui",
         executable="joint_state_publisher_gui",
         condition=IfCondition(gui),
     )
     robot_state_publisher_node = Node(
-        namespace='robot1',
+       # namespace='robot1',
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="both",

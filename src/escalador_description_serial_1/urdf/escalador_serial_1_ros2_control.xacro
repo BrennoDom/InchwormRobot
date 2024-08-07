@@ -12,6 +12,9 @@
       </hardware>
       <joint name="J1">
         <param name="id">1</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -20,6 +23,9 @@
       </joint>
       <joint name="J2">
         <param name="id">2</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -28,6 +34,9 @@
       </joint>
       <joint name="J3">
         <param name="id">3</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -36,6 +45,9 @@
       </joint>
       <joint name="J4">
         <param name="id">4</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -44,6 +56,9 @@
       </joint>
       <joint name="J5">
         <param name="id">5</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -52,6 +67,9 @@
       </joint>
       <joint name="J6">
         <param name="id">6</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -59,7 +77,10 @@
         <state_interface name="effort"/>
       </joint>
       <joint name="BASE1">
-        <param name="id">10</param>
+        <param name="id">20</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -67,7 +88,10 @@
         <state_interface name="effort"/>
       </joint>
       <joint name="BASE2">
-        <param name="id">20</param>
+        <param name="id">10</param>
+        <param name="Position_P_Gain">15000</param>
+        <param name="Position_I_Gain">200</param>
+        <param name="Position_D_Gain">100</param>
         <command_interface name="position"/>
         <command_interface name="velocity"/>
         <state_interface name="position"/>

@@ -12,18 +12,20 @@
   <link name="${prefix}end-effector"/>
   <link name="${prefix}end-dummy"/>
   <joint name="dummy_joint" type="fixed">
+    <limit upper="0" lower="0" effort="0" velocity="0"/>
     <origin rpy="0.0 3.14 0.0" xyz="0.0 0.0 0.000"/>
     <parent link="${prefix}end-effector"/>
     <child link="${prefix}end-dummy"/>
   </joint>
   <joint name="end_joint" type="fixed">
-    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.07400"/>
+    <limit upper="0" lower="0" effort="0" velocity="0"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.07100"/>
     <parent link="${prefix}LINK_7"/>
     <child link="${prefix}end-effector"/>
   </joint>
 
   <joint name="J1" type="revolute">
-    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <limit lower="-6.28000" upper="6.28000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-0.00000 -0.00000 3.14159" xyz="0.00000 -0.00000 0.07100"/>
     <parent link="${prefix}LINK_1"/>
     <child link="${prefix}LINK_2"/>
@@ -44,7 +46,7 @@
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J4" type="revolute">
-    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <limit lower="-6.28000" upper="6.28000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 0.00000 0.00000" xyz="-0.00000 -0.13800 -0.00000"/>
     <parent link="${prefix}LINK_4"/>
     <child link="${prefix}LINK_5"/>
@@ -58,7 +60,7 @@
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
   <joint name="J6" type="revolute">
-    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <limit lower="-6.28000" upper="6.28000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 0.00000 0.00000" xyz="-0.00000 -0.10900 -0.00000"/>
     <parent link="${prefix}LINK_6"/>
     <child link="${prefix}LINK_7"/>
@@ -72,15 +74,17 @@
       </geometry>
     </collision>
     <inertial>
-      <inertia ixx="0.00048" ixy="0.00000" ixz="0.00006" iyy="0.00077" iyz="0.00000" izz="0.00059"/>
-      <origin rpy="0.00000 0.00000 0.00000" xyz="0.00889 0.00002 0.02822"/>
-      <mass value="1.50000"/>
+      <origin xyz="-0.011218 -0.000000 0.018785" rpy="0 0 0"/>
+      <mass value="0.375"/>
+      <inertia ixx="0.000108994"
+              ixy="-0.000000000" iyy="0.000198249"
+              ixz="0.000016726" iyz="-0.000000000" izz="0.000200988" />
     </inertial>
     <visual name="LINK_1_visual">
       <origin rpy="0.00000 0.00000 -0.00000" xyz="-0.00000 -0.00000 0.00000"/>
       <material name="SILVER"/>
       <geometry>
-        <mesh filename="file://$(find escalador_description_serial_1)/meshes/ON-OFF-PAW-Alumínio_MEF.148.dae" scale="0.00100 0.00100 0.00100"/>
+        <mesh filename="file://$(find escalador_description_serial_1)/meshes/pata_1.dae" scale="0.00100 0.00100 0.00100"/>
       </geometry>
     </visual>
   </link>
@@ -92,9 +96,11 @@
       </geometry>
     </collision>
     <inertial>
-      <inertia ixx="0.00088" ixy="-0.00000" ixz="-0.00000" iyy="0.00071" iyz="-0.00009" izz="0.00031"/>
-      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00000 0.00420 0.05390"/>
-      <mass value="1.50000"/>
+      <origin xyz="-0.000005 -0.008676 0.052092" rpy="0 0 0"/>
+      <mass value="0.354"/>
+      <inertia ixx="0.000223854"
+              ixy="0.000000016" iyy="0.000146294"
+              ixz="-0.000000107" iyz="-0.000034608" izz="0.000151022" />
     </inertial>
     <visual name="LINK_2_visual">
       <origin rpy="1.57080 0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
@@ -112,9 +118,11 @@
       </geometry>
     </collision>
     <inertial>
-      <inertia ixx="0.00640" ixy="0.00000" ixz="0.00001" iyy="0.00638" iyz="-0.00009" izz="0.00033"/>
-      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00001 -0.10623 0.00117"/>
-      <mass value="1.50000"/>
+      <origin xyz="-0.000017 -0.000742 0.101033" rpy="0 0 0"/>
+      <mass value="0.477"/>
+      <inertia ixx="0.002864655"
+                ixy="-0.000000004" iyy="0.002867671"
+                ixz="0.000000689" iyz="-0.000000419" izz="0.000140001" />
     </inertial>
     <visual name="LINK_3_visual">
       <origin rpy="0.00000 0.00000 -2.61870" xyz="-0.00000 0.00000 0.00000"/>
@@ -132,9 +140,11 @@
       </geometry>
     </collision>
     <inertial>
-      <inertia ixx="0.00063" ixy="-0.00000" ixz="0.00000" iyy="0.00054" iyz="0.00007" izz="0.00014"/>
-      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00009 -0.07515 -0.00263"/>
-      <mass value="1.50000"/>
+        <origin xyz="0.000000 -0.009079 0.081987" rpy="0 0 0"/>
+        <mass value="0.372"/>
+        <inertia ixx="0.000135253"
+                ixy="-0.000000000" iyy="0.000047636"
+                ixz="-0.000000000" iyz="0.000000471" izz="0.000162513" />
     </inertial>
     <visual name="LINK_4_visual">
       <origin rpy="0.00000 0.00000 -0.52360" xyz="0.00000 0.00000 0.00000"/>
@@ -152,10 +162,12 @@
       </geometry>
     </collision>
     <inertial>
-      <inertia ixx="0.00064" ixy="-0.00000" ixz="0.00000" iyy="0.00056" iyz="0.00001" izz="0.00027"/>
-      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00007 0.00099 0.03555"/>
-      <mass value="1.50000"/>
-    </inertial>
+        <origin xyz="0.000000 -0.001015 -0.021991" rpy="0 0 0"/>
+        <mass value="0.202"/>
+        <inertia ixx="0.000117912"
+                ixy="-0.000000000" iyy="0.000105186"
+                ixz="-0.000000000" iyz="0.000003166" izz="0.000048390" />
+      </inertial>
     <visual name="LINK_5_visual">
       <origin rpy="-1.57080 -0.52299 0.00000" xyz="0.00000 -0.00000 -0.00000"/>
       <material name="ROBO"/>
@@ -172,9 +184,11 @@
       </geometry>
     </collision>
     <inertial>
-      <inertia ixx="0.00454" ixy="0.00000" ixz="-0.00000" iyy="0.00364" iyz="0.00044" izz="0.00158"/>
-      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00000 -0.05424 -0.00420"/>
-      <mass value="1.50000"/>
+        <origin xyz="-0.000005 -0.008676 0.052092" rpy="0 0 0"/>
+        <mass value="0.354"/>
+        <inertia ixx="0.000223854"
+                ixy="0.000000016" iyy="0.000146294"
+                ixz="-0.000000107" iyz="-0.000034608" izz="0.000151022" />
     </inertial>
     <visual name="LINK_6_visual">
       <origin rpy="-0.00000 0.00000 0.00000" xyz="-0.00000 0.00000 0.00000"/>
@@ -192,15 +206,17 @@
       </geometry>
     </collision>
     <inertial>
-      <inertia ixx="0.00049" ixy="-0.00000" ixz="0.00006" iyy="0.00079" iyz="-0.00000" izz="0.00061"/>
-      <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00889 0.00002 0.04190"/>
-      <mass value="1.50000"/>
+        <origin xyz="-0.011218 -0.000000 0.018785" rpy="0 0 0"/>
+        <mass value="0.375"/>
+        <inertia ixx="0.000108994"
+                ixy="-0.000000000" iyy="0.000198249"
+                ixz="0.000016726" iyz="-0.000000000" izz="0.000200988" />
     </inertial>
     <visual name="LINK_7_visual">
       <origin rpy="3.14159 -0.00000 3.14159" xyz="0.00000 0.00000 0.00000"/>
       <material name="ROBO"/>
       <geometry>
-        <mesh filename="file://$(find escalador_description_serial_1)/meshes/ON-OFF-PAW-Alumínio_MEF.050.dae" scale="0.00100 0.00100 0.00100"/>
+        <mesh filename="file://$(find escalador_description_serial_1)/meshes/pata_2.dae" scale="0.00100 0.00100 0.00100"/>
       </geometry>
     </visual>
   </link>

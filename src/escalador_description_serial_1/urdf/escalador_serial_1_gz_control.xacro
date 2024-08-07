@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="initial_positions_file" default="$(find escalador_description_serial_1)/config/mvp_6j_init_pos.yaml" />
+  <xacro:arg name="controllers_file" default="$(find escalador_description_serial_1)/config/mvp_6j_controller.yaml" />
+  <xacro:property name="initial_positions_file" value="$(arg initial_positions_file)"/>
+  <xacro:property name="initial_positions" value="${xacro.load_yaml(initial_positions_file)['initial_positions']}"/> 
+  <xacro:property name="controllers_file" value="$(arg controllers_file)"/>
+  <xacro:macro name="escalador_serial_1_control_gazebo" params="name">
+    <!-- Import simulation interface system -->
+    <ros2_control name="${name}" type="system">
+        <hardware>
+            <plugin>ign_ros2_control/IgnitionSystem</plugin>
+        </hardware>
+    
+        <joint name="J1">      
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+            <param name="initial_value">${initial_positions['J1']}</param>
+            </state_interface>
+            <state_interface name="velocity" />
+        </joint>
+        
+        <joint name="J2">     
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+            <param name="initial_value">${initial_positions['J2']}</param>
+            </state_interface>
+            <state_interface name="velocity" />      
+        </joint>
+
+        <joint name="J3">
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+            <param name="initial_value">${initial_positions['J3']}</param>
+            </state_interface>
+            <state_interface name="velocity" />
+        </joint>
+
+        <joint name="J4">
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+            <param name="initial_value">${initial_positions['J4']}</param>
+            </state_interface>
+            <state_interface name="velocity" />
+        </joint>
+
+        <joint name="J5">
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+            <param name="initial_value">${initial_positions['J5']}</param>
+            </state_interface>
+            <state_interface name="velocity" />
+        </joint>
+
+        <joint name="J6">
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+            <param name="initial_value">${initial_positions['J6']}</param>
+            </state_interface>
+            <state_interface name="velocity" />
+        </joint>
+    </ros2_control>
+
+    <gazebo>
+      <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin" >          
+          <robot_param>robot_description</robot_param>
+          <robot_param_node>robot_state_publisher</robot_param_node>
+          <parameters>${controllers_file}</parameters>          
+          <controller_manager_prefix_node_name>controller_manager</controller_manager_prefix_node_name>
+      </plugin>
+    </gazebo>    
+    </xacro:macro>
+</robot>
