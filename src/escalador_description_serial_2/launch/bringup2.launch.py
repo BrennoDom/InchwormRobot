@@ -76,10 +76,23 @@ def generate_launch_description():
     
     )
 
+    robot_controller_position = Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=["position_controller", "-c", "/controller_manager"],
+            output="screen",
+    )
+
     robot_controller_velocity = Node(
             package="controller_manager",
             executable="spawner",
             arguments=["velocity_controller", "-c", "/controller_manager"],
+            output="screen",
+    )
+    robot_joint_trajectory = Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
             output="screen",
     )
     robot_state_publisher_node = Node(
@@ -99,9 +112,9 @@ def generate_launch_description():
     nodes = [
         robot_state_publisher_node,
         state_publisher,
-        robot_controller_node,
         robot_joint_state_broadcaster,
-        robot_controller_velocity
+        robot_controller_node,
+        robot_joint_trajectory
     ]
 
     return LaunchDescription(declared_arguments + nodes)

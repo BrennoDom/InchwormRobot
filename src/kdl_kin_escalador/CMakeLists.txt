@@ -26,11 +26,11 @@ find_package(Qt5Widgets REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(invKin src/ik_kinematics_node.cpp)
+add_executable(ik_kinematics_node src/ik_kinematics_node.cpp)
 #target_include_directories(kdl_kin_escalador PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)
 #target_compile_features(invKin c_std_99 cxx_std_17)  
 ament_target_dependencies(
-invKin 
+ik_kinematics_node 
 tf2
 tf2_ros
 rclcpp
@@ -42,7 +42,7 @@ std_msgs
 urdf
 )
 install(TARGETS
-  invKin
+  ik_kinematics_node
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

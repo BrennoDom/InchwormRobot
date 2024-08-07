@@ -33,6 +33,7 @@ using hardware_interface::return_type;
 
 namespace dynamixel_hardware
 {
+
 struct JointValue
 {
   double position{0.0};
@@ -85,6 +86,9 @@ public:
   DYNAMIXEL_HARDWARE_PUBLIC
   return_type write(const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
+  std::vector<double> joint_p_encoder_;
+
+
 private:
   return_type enable_torque(const bool enabled);
 
@@ -100,6 +104,8 @@ private:
   std::map<const char * const, const ControlItem *> control_items_;
   std::vector<Joint> joints_;
   std::vector<uint8_t> joint_ids_;
+  std::vector<double> joint_offsets_;
+  
   bool torque_enabled_{false};
   ControlMode control_mode_{ControlMode::Position};
   bool mode_changed_{false};

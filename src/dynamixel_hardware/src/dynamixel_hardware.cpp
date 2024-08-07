@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "dynamixel_hardware/dynamixel_hardware.hpp"
-
+#include <iostream>
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -23,6 +23,15 @@
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
+
+double normalize( const double value, const double start, const double end ) 
+{
+  const double width       = end - start   ;   
+  const double offsetValue = value - start ;   
+
+  return ( offsetValue - ( floor( offsetValue / width ) * width ) ) + start ;
+}
+
 
 namespace dynamixel_hardware
 {
@@ -46,6 +55,8 @@ constexpr const char * const kExtraJointParameters[] = {
   "Position_D_Gain",
   "Velocity_P_Gain",
   "Velocity_I_Gain",
+  "Feedforward_2nd_Gain",
+  "Feedforward_1st_Gain",
 };
 
 CallbackReturn DynamixelHardware::on_init(const hardware_interface::HardwareInfo & info)
@@ -58,6 +69,8 @@ CallbackReturn DynamixelHardware::on_init(const hardware_interface::HardwareInfo
 
   joints_.resize(info_.joints.size(), Joint());
   joint_ids_.resize(info_.joints.size(), 0);
+  joint_offsets_.resize(info_.joints.size(),0);
+  joint_p_encoder_.resize(info_.joints.size(),0);
 
   for (uint i = 0; i < info_.joints.size(); i++) {
     joint_ids_[i] = std::stoi(info_.joints[i].parameters.at("id"));
@@ -70,6 +83,8 @@ CallbackReturn DynamixelHardware::on_init(const hardware_interface::HardwareInfo
     joints_[i].prev_command.position = joints_[i].command.position;
     joints_[i].prev_command.velocity = joints_[i].command.velocity;
     joints_[i].prev_command.effort = joints_[i].command.effort;
+    joint_offsets_[i] = std::stod(info_.joints[i].parameters.at("offset"));
+    joint_p_encoder_[i] = std::numeric_limits<double>::quiet_NaN();
     RCLCPP_INFO(rclcpp::get_logger(kDynamixelHardware), "joint_id %d: %d", i, joint_ids_[i]);
   }
 
@@ -272,10 +287,15 @@ return_type DynamixelHardware::read(const rclcpp::Time & /* time */, const rclcp
   }
 
   for (uint i = 0; i < ids.size(); i++) {
-    joints_[i].state.position =  dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]);
+    
+    //joints_[i].state.position =  normalize((dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]) + joint_offsets_[i]),-3.14,3.14);
+    joints_[i].state.position = (dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]) + joint_offsets_[i]);
     joints_[i].state.velocity = dynamixel_workbench_.convertValue2Velocity(ids[i], velocities[i]);
     joints_[i].state.effort = dynamixel_workbench_.convertValue2Current(currents[i]);
+    joint_p_encoder_[i] = (dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]) + joint_offsets_[i]);
   }
+
+
 
   return return_type::OK;
 }
@@ -453,8 +473,10 @@ CallbackReturn DynamixelHardware::set_joint_positions()
   std::copy(joint_ids_.begin(), joint_ids_.end(), ids.begin());
   for (uint i = 0; i < ids.size(); i++) {
     joints_[i].prev_command.position = joints_[i].command.position;
+    std::cout << joint_p_encoder_[i];
     commands[i] = dynamixel_workbench_.convertRadian2Value(
-      ids[i], static_cast<float>(joints_[i].command.position));
+      ids[i], static_cast<float>(((joints_[i].command.position - joint_offsets_[i]) )));
+    
   }
   if (!dynamixel_workbench_.syncWrite(
         kGoalPositionIndex, ids.data(), ids.size(), commands.data(), 1, &log)) {
@@ -478,6 +500,7 @@ CallbackReturn DynamixelHardware::set_joint_velocities()
   if (!dynamixel_workbench_.syncWrite(
         kGoalVelocityIndex, ids.data(), ids.size(), commands.data(), 1, &log)) {
     RCLCPP_ERROR(rclcpp::get_logger(kDynamixelHardware), "%s", log);
+    
   }
   return CallbackReturn::SUCCESS;
 }

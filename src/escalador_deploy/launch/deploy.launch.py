@@ -67,6 +67,12 @@ def generate_launch_description():
             output="screen"
             
         )
+    kinematics = Node(
+        package ='kdl_kin_escalador',
+        executable="ik_kinematics_node",
+        name="ik_kinematics_node",
+        output="screen"
+    )
 
 
     return LaunchDescription([
