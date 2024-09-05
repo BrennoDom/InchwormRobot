@@ -56,6 +56,9 @@ GuiEscalador::GuiEscalador(QWidget *parent) :
   EndEffec_sub_ = node_ -> create_subscription<std_msgs::msg::Float32MultiArray>(
               "end_effector_pos",10, std::bind(&GuiEscalador::EndEffectorCallback, this, _1));
 
+  Joy_sub_ = node_ -> create_subscription<sensor_msgs::msg::Joy>(
+              "/joy", 10, std::bind(&GuiEscalador::JoyCallback, this, _1));
+
   //node_->declare_parameter("hello_topic", "~/chatter");
   //std::string hello_topic = node_->get_parameter("hello_topic").get_parameter_value().get<std::string>();
   //chatter_sub_ = node_->create_subscription<std_msgs::msg::String>(
@@ -133,6 +136,17 @@ void GuiEscalador::JointsCallback(const sensor_msgs::msg::JointState::SharedPtr 
 
 }
 
+void GuiEscalador::JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg){
+
+    double offset = ((BUTTON_L2_TRIGGER - 1) - (BUTTON_R2_TRIGGER - 1)) * 50;
+
+    ui->slider_x->setValue(offset * BUTTON_CROSS);
+    ui->slider_y->setValue(offset * BUTTON_SQUARE);
+    ui->slider_z->setValue(offset * BUTTON_CIRCLE);
+    ui->slider_roll->setValue(offset * ((BUTTON_UP_DOWN == -1) ? 1 : 0));
+    ui->slider_pitch->setValue(offset * ((BUTTON_LEFT_RIGHT == -1) ? 1 : 0));
+    ui->slider_yaw->setValue(offset * ((BUTTON_LEFT_RIGHT == 1) ? 1 : 0));
+}
 
 int main(int argc, char * argv[])
 {  

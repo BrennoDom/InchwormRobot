@@ -32,6 +32,25 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/int32_multi_array.hpp>
 #include <std_msgs/msg/float32_multi_array.hpp>
+#include <sensor_msgs/msg/joy.hpp>
+
+// Map PS5 dualsense buttons
+#define BUTTON_CROSS        msg->buttons[0]
+#define BUTTON_CIRCLE       msg->buttons[1]
+#define BUTTON_TRIANGLE     msg->buttons[2]
+#define BUTTON_SQUARE       msg->buttons[3]
+#define BUTTON_L1           msg->buttons[4]
+#define BUTTON_R1           msg->buttons[5]
+#define BUTTON_L2           msg->buttons[6]
+#define BUTTON_R2           msg->buttons[7]
+#define AXIS_LEFT_X         msg->axes[0]
+#define AXIS_LEFT_Y         msg->axes[1]
+#define BUTTON_L2_TRIGGER   msg->axes[2]
+#define AXIS_RIGHT_X        msg->axes[3]
+#define AXIS_RIGHT_Y        msg->axes[4]
+#define BUTTON_R2_TRIGGER   msg->axes[5]
+#define BUTTON_LEFT_RIGHT   msg->axes[6]
+#define BUTTON_UP_DOWN      msg->axes[7]
 
 namespace Ui {
 class GuiEscalador;
@@ -47,6 +66,7 @@ public:
   void chatterCallback(const std_msgs::msg::String::SharedPtr msg);
   void JointsCallback(const sensor_msgs::msg::JointState::SharedPtr Joints);
   void EndEffectorCallback(const std_msgs::msg::Float32MultiArray::SharedPtr Param);
+  void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
 
   rclcpp::Node::SharedPtr node_;
 public slots:
@@ -76,6 +96,7 @@ private:
 
   //rclcpp::Subscription<std_msgs::msg::String>::SharedPtr chatter_sub_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr Joint_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr Joy_sub_;
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr EndEffec_sub_;
   //rclcpp::Publisher<std_msgs::msg::String>::SharedPtr  hello_pub_;
   //rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr  Joint_pub_;
