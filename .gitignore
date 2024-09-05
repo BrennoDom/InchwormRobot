@@ -1,3 +1,5 @@
+src/dynamixel-workbench
+src/dynamixel-workbench-msgs
 build
 log
 install

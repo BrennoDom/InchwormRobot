@@ -87,7 +87,7 @@ class StatePublisher(Node):
        self.J6 = msg.data[5]* self.degree
     def ChangeBaseCallback(self,request,response):
 
-        self.flagBase = False;
+        self.flagBase = False
         string_robot = String()
         if request.change is False:
 
