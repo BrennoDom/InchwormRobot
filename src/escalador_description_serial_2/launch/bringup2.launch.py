@@ -112,8 +112,10 @@ def generate_launch_description():
     nodes = [
         robot_state_publisher_node,
         state_publisher,
-        robot_joint_state_broadcaster,
         robot_controller_node,
+        robot_joint_state_broadcaster,
+        robot_controller_velocity,
+        robot_controller_position,
         robot_joint_trajectory
     ]
 

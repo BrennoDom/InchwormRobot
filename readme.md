@@ -1,6 +1,10 @@
 This, is the official workspace for "Escalador" Project. This place will be TODO list for the project.
-To compile, you must have ROS2 humble installed on PC.
+To compile, you must have ROS2 humble installed on PC and must clone this repository with dynamixel_control.repos and clone it with the command below:
 
+
+```shell
+vcs import src < src/dynamixel_control.repos
+```
 
 
 TODO List
@@ -10,8 +14,8 @@ TODO List
         - Not fully implemented, needs the URDF from the other base
     - Parallel links with central base odom
         - OK, needs aproove with inverse kinematics model~~
-- Make Dynamixel servos communication
-- Make Inverse kinematics package
+~~- Make Dynamixel servos communication~~
+~~- Make Inverse kinematics package~~
     ~~- Tests with Moveit, and KDL packages~~
     - Studying how to implement inverse kinematics on node package
 - Implement Sensor logic orientation control

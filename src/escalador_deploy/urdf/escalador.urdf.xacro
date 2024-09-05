@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="escalador" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find escalador_deploy)/urdf/escalador.ros2_control.xacro" />
+  <xacro:include filename="$(find escalador_deploy)/urdf/escalador_ros2_control.xacro" />
 
 
   <xacro:escalador_ros2_control name="escalador_ros2_control" />

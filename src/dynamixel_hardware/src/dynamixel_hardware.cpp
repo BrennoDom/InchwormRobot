@@ -32,6 +32,17 @@ double normalize( const double value, const double start, const double end )
   return ( offsetValue - ( floor( offsetValue / width ) * width ) ) + start ;
 }
 
+double denormalize(const double normalizedValue, const double start, const double end, const double referencePoint) 
+{
+    const double width = end - start;
+
+    // Find the closest multiple of the width that could have been subtracted
+    double n = round((referencePoint - normalizedValue) / width);
+
+    // Reconstruct the original value
+    return normalizedValue + n * width;
+}
+
 
 namespace dynamixel_hardware
 {
@@ -116,7 +127,7 @@ CallbackReturn DynamixelHardware::on_init(const hardware_interface::HardwareInfo
     }
   }
 
-  enable_torque(false);
+  enable_torque(true);
   set_control_mode(ControlMode::Position, true);
   set_joint_params();
   enable_torque(true);
@@ -288,11 +299,13 @@ return_type DynamixelHardware::read(const rclcpp::Time & /* time */, const rclcp
 
   for (uint i = 0; i < ids.size(); i++) {
     
-    //joints_[i].state.position =  normalize((dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]) + joint_offsets_[i]),-3.14,3.14);
-    joints_[i].state.position = (dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]) + joint_offsets_[i]);
+    joint_p_encoder_[i] = (dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]) + joint_offsets_[i]);
+    joints_[i].state.position =  normalize(joint_p_encoder_[i],-3.14,3.14);
+    //joints_[i].state.position =  denormalize(joints_[i].state.position,-3.14,3.14,joint_p_encoder_[i]);
+    //joints_[i].state.position = joint_p_encoder_[i];
     joints_[i].state.velocity = dynamixel_workbench_.convertValue2Velocity(ids[i], velocities[i]);
     joints_[i].state.effort = dynamixel_workbench_.convertValue2Current(currents[i]);
-    joint_p_encoder_[i] = (dynamixel_workbench_.convertValue2Radian(ids[i], positions[i]) + joint_offsets_[i]);
+    
   }
 
 
@@ -394,7 +407,7 @@ return_type DynamixelHardware::set_control_mode(const ControlMode & mode, const 
   if (mode == ControlMode::Velocity && (force_set || control_mode_ != ControlMode::Velocity)) {
     bool torque_enabled = torque_enabled_;
     if (torque_enabled) {
-      enable_torque(false);
+      enable_torque(true);
     }
 
     for (uint i = 0; i < joint_ids_.size(); ++i) {
@@ -419,7 +432,7 @@ return_type DynamixelHardware::set_control_mode(const ControlMode & mode, const 
   if (mode == ControlMode::Position && (force_set || control_mode_ != ControlMode::Position)) {
     bool torque_enabled = torque_enabled_;
     if (torque_enabled) {
-      enable_torque(false);
+      enable_torque(true);
     }
 
     for (uint i = 0; i < joint_ids_.size(); ++i) {
@@ -473,9 +486,10 @@ CallbackReturn DynamixelHardware::set_joint_positions()
   std::copy(joint_ids_.begin(), joint_ids_.end(), ids.begin());
   for (uint i = 0; i < ids.size(); i++) {
     joints_[i].prev_command.position = joints_[i].command.position;
-    std::cout << joint_p_encoder_[i];
+    
     commands[i] = dynamixel_workbench_.convertRadian2Value(
-      ids[i], static_cast<float>(((joints_[i].command.position - joint_offsets_[i]) )));
+      ids[i], static_cast<float>(((denormalize(joints_[i].command.position,-3.14,3.14,joint_p_encoder_[i])) - joint_offsets_[i] )));
+    std::cout << denormalize(joints_[i].command.position,-3.14,3.14,joint_p_encoder_[i]);
     
   }
   if (!dynamixel_workbench_.syncWrite(
