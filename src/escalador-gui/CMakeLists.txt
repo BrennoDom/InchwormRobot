@@ -13,6 +13,8 @@ set(ROS_PKGS
     rclcpp
     std_msgs
     sensor_msgs
+    control_msgs
+    escalador_interfaces
   )
 set(LIBRARIES
     Qt5Widgets
@@ -60,7 +62,9 @@ add_executable(gui src/gui_escalador.cpp ${HDRS} ${SRCS} ${UI})
 ament_target_dependencies(gui 
 rclcpp
 std_msgs
-sensor_msgs)
+sensor_msgs
+control_msgs
+escalador_interfaces)
 target_link_libraries(gui Qt5::Widgets Qt5::PrintSupport)
 target_include_directories(gui PRIVATE "include/${PROJECT_NAME}/")
 
@@ -78,4 +82,4 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
+  ament_package()

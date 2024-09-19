@@ -34,13 +34,22 @@ using hardware_interface::return_type;
 namespace dynamixel_hardware
 {
 
+struct GPIOValue
+{
+  double Analog{0.0};
+  double Digital{0.0};
+};
+struct GPIO
+{
+  GPIOValue state{};
+  GPIOValue command{};
+};
 struct JointValue
 {
   double position{0.0};
   double velocity{0.0};
   double effort{0.0};
 };
-
 struct Joint
 {
   JointValue state{};
@@ -104,7 +113,12 @@ private:
   std::map<const char * const, const ControlItem *> control_items_;
   std::vector<Joint> joints_;
   std::vector<uint8_t> joint_ids_;
+  int StatesIO,CommandsIO;
   std::vector<double> joint_offsets_;
+  std::vector<double> Inputs;
+  std::vector<double> Outputs;
+
+
   
   bool torque_enabled_{false};
   ControlMode control_mode_{ControlMode::Position};

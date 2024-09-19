@@ -8,11 +8,17 @@ controller_manager:
     velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
 
-    joint_trajectory_controller:
+    BASE1_CONTROLLER:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    BASE2_CONTROLLER:
       type: joint_trajectory_controller/JointTrajectoryController
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
+
+    gpio_controller:
+      type: dynamixel_hardware/GPIOController
 
     
 
@@ -25,6 +31,7 @@ velocity_controller:
       - J4
       - J5
       - J6
+    
 
 position_controller:
   ros__parameters:
@@ -35,11 +42,22 @@ position_controller:
       - J4
       - J5
       - J6
+    
       
-joint_trajectory_controller:
+BASE1_CONTROLLER:
   ros__parameters:
     joints:
       - BASE1
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+
+BASE2_CONTROLLER:
+  ros__parameters:
+    joints:
       - BASE2
 
     command_interfaces:
@@ -47,3 +65,52 @@ joint_trajectory_controller:
 
     state_interfaces:
       - position
+
+gpio_controller:
+
+  ros__parameters:
+  
+    inputs:
+     - TorqueEnable/TE_1
+     - TorqueEnable/TE_2
+     - TorqueEnable/TE_3
+     - TorqueEnable/TE_4
+     - TorqueEnable/TE_5
+     - TorqueEnable/TE_6
+     - TorqueEnable/TE_7
+     - TorqueEnable/TE_8
+     - Reboot/M1
+     - Reboot/M2
+     - Reboot/M3
+     - Reboot/M4
+     - Reboot/M5
+     - Reboot/M6
+     - Reboot/M7
+     - Reboot/M8
+     - Status/M1
+     - Status/M2
+     - Status/M3
+     - Status/M4
+     - Status/M5
+     - Status/M6
+     - Status/M7
+     - Status/M8
+
+
+    outputs:
+     - TorqueEnable/TE_1
+     - TorqueEnable/TE_2
+     - TorqueEnable/TE_3
+     - TorqueEnable/TE_4
+     - TorqueEnable/TE_5
+     - TorqueEnable/TE_6
+     - TorqueEnable/TE_7
+     - TorqueEnable/TE_8
+     - Reboot/M1
+     - Reboot/M2
+     - Reboot/M3
+     - Reboot/M4
+     - Reboot/M5
+     - Reboot/M6
+     - Reboot/M7
+     - Reboot/M8

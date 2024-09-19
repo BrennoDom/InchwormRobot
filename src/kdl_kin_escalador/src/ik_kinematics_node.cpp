@@ -35,6 +35,7 @@
 #include <std_msgs/msg/float32_multi_array.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/header.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 
 
@@ -87,6 +88,7 @@ class IKSolver: public rclcpp::Node
 		void robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg);
 		void robotJointCallback(const sensor_msgs::msg::JointState::SharedPtr Joints);
 		void VelsCallback(const std_msgs::msg::Int32MultiArray::SharedPtr Vel);
+		void refCallback(const std_msgs::msg::Bool::SharedPtr msg);
 \
 
 		double x, y, z, roll, pitch, yaw;
@@ -95,6 +97,7 @@ class IKSolver: public rclcpp::Node
 		rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr robotActualJoint;
 		rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr robotActualRobot;
 		rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr robotvelSub;
+		rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr KinRef;
 		rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr robotvelPub;
 		rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr robotposPub;
 		rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr JTrajectory;
@@ -109,7 +112,7 @@ class IKSolver: public rclcpp::Node
 		std::unique_ptr<KDL::ChainJntToJacSolver> jacobian_solver_;
 		std::unique_ptr<KDL::ChainFkSolverPos_recursive> foward_solver_;
   		KDL::Jacobian jacobian_;
-		int actualBase_, oldBase;
+		int actualBase_, oldBase, actRef, BaseChanged;
 		bool initialcondOK = false;
 		bool commandDrives = false;
 		std::string robotDescription_1;
@@ -155,6 +158,8 @@ IKSolver::IKSolver(): Node("ik_kinematics_node")
 
 	robotActualRobot = this->create_subscription<std_msgs::msg::Int8>(
     "act_base", 10, std::bind(&IKSolver::robotBaseCallback, this, std::placeholders::_1));
+
+	KinRef = this->create_subscription<std_msgs::msg::Bool>("act_ref",10, std::bind(&IKSolver::refCallback, this, std::placeholders::_1));
 
 	robotvelPub = this->create_publisher<std_msgs::msg::Float64MultiArray>(
 	"/velocity_controller/commands", 10);
@@ -204,7 +209,10 @@ double normalize( const double value, const double start, const double end )
   // + start to reset back to start of original range
 }
 
+void IKSolver::refCallback(const std_msgs::msg::Bool::SharedPtr msg){
 
+	actRef = msg->data;
+}
 void IKSolver::robotJointCallback(const sensor_msgs::msg::JointState::SharedPtr Joints)
 {
 	act_joints = Joints->position;
@@ -217,7 +225,7 @@ void IKSolver::VelsCallback(const std_msgs::msg::Int32MultiArray::SharedPtr Vel)
 {
 	dxe_ << Vel->data[0]/1000.0 , Vel->data[1]/1000.0, Vel->data[2]/1000.0, Vel->data[3]/100.0, Vel->data[4]/100.0, Vel->data[5]/100.0;
 	
-	RCLCPP_INFO_STREAM(get_logger(),dxe_);
+	//RCLCPP_INFO_STREAM(get_logger(),dxe_);
 	
 }
 void IKSolver::robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg)
@@ -226,6 +234,7 @@ void IKSolver::robotBaseCallback(const std_msgs::msg::Int8::SharedPtr msg)
 	
 	//RCLCPP_INFO(this->get_logger(), "I heard: '%d'", msg->data);
 	actualBase_ = msg->data;
+	
 	
 }
 
@@ -334,24 +343,38 @@ void IKSolver::publisher()
 	//
 	M_TA = Eigen::MatrixXd::Zero(6,6);
 	M_TA.block<3,3>(0,0) = Eigen::Matrix<double, 3, 3>::Identity();
+	if (oldBase != actualBase_){
+		BaseChanged = true;
+	}else{
+		BaseChanged = false;
+	}
+	switch (actualBase_){
+		case 0:
+			if (BaseChanged == true){
+				actRef = false;
+			}
+			oldBase = false;
+			break;
+		case 1:
+			if (BaseChanged == true){
+				actRef = true;
+			}
+			oldBase = true;
+			break;
+		std::cout << actRef;
+	}
 	
-	
-		switch(actualBase_){
+		switch(actRef){
 			
 
-			case 0:
-
-					RCLCPP_INFO(this->get_logger(), "actualBase_: '%d'", actualBase_);
-
+			case false:
 					linkSource = "robot1/LINK_1";
 					linkEnd = "robot1/end-effector";
-					
 					if (!kdl_parser::treeFromString(robotDescription_1,tree))
 							RCLCPP_ERROR_STREAM(get_logger(),"Failed to construct KDL tree.");
 							
 					if ((!tree.getChain(linkSource,linkEnd,chain_)))  {
 							RCLCPP_ERROR_STREAM(get_logger(),"Failed to get chain from KDL tree.");
-						
 						}
 					jacobian_solver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
 					foward_solver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain_);
@@ -363,13 +386,6 @@ void IKSolver::publisher()
 					q_(3)=act_joints[3];
 					q_(4)=act_joints[4];
 					q_(5)=act_joints[5];
-					Base1 = act_joints[6]*57.2958;
-					Base2 = act_joints[7]*57.2958;
-					Base1 = normalize(Base1,-360,360);
-					Base2 = normalize(Base2,-360,360);
-					
-					
-
 					jacobian_solver_->JntToJac(q_, jacobian_);
 					foward_solver_ ->JntToCart(q_,FKkin);
 					x = FKkin.p.x();
@@ -378,17 +394,12 @@ void IKSolver::publisher()
 					FKkin.M.GetRPY(roll,pitch,yaw);
 					inverseJac = pinv(jacobian_.data);
 					dq_ = inverseJac * dxe_;
-					
-					//q_Next = q_.data + dq_*0.01;
-					
 					q_Next[0] = q_act[0] + (dq_[0] *0.001);
 					q_Next[1] = q_act[1] + (dq_[1] *0.001);
 					q_Next[2] = q_act[2] + (dq_[2] *0.001);
 					q_Next[3] = q_act[3] + (dq_[3] *0.001);
 					q_Next[4] = q_act[4] + (dq_[4] *0.001);
 					q_Next[5] = q_act[5] + (dq_[5] *0.001);
-
-
 					commandDrives = false;
 					for (int i = 0; i < 6; i++) {
 						if (dxe_[i] != 0) {
@@ -406,44 +417,9 @@ void IKSolver::publisher()
 							q_act[i] = act_joints[i];
 						} 
 					}
-
-					RCLCPP_INFO_STREAM(get_logger(),(q_Next));
-					//RCLCPP_INFO_STREAM(get_logger(),(Base2));
-					d_b1 = 0.0;
-					d_b2 = 0.0;
-					/*
-					while (abs(Base2) <= 85 || abs(Base2) >= 95 ){
-							d_b2 = 1.00;
-							flag = false;
-							break;
-						}
-					while ((((Base1) <= -1 || (Base1) >= 5 ) ) && (d_b2 == 0.0)){		
-							if (flag != true){
-								veljointPub.data = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-								robotvelPub -> publish(veljointPub);	
-								sleep(1);
-								flag = true;
-							}
-							d_b1 = -1.00;
-							break;
-					}
-					*/
-					//std::cout << q_.data;
-					jointStates_.header.stamp = rclcpp::Node::get_clock() -> now();
-					Postrajectory.header.stamp = rclcpp::Node::get_clock() -> now();					
-					trajPosJoint.time_from_start.nanosec = 1000000;
-					Postrajectory.joint_names = {"J1","J2","J3","J4","J5","J6","BASE1","BASE2"};
-					jointStates_.name = {"J1","J2","J3","J4","J5","J6"};
-					jointStates_.velocity= {dq_[0],dq_[1],dq_[2],dq_[3],dq_[4],dq_[5]};
-					veljointPub.data = {dq_[0],dq_[1],dq_[2],dq_[3],dq_[4],dq_[5]};
-					jointStates_.position= {q_Next[0],q_Next[1],q_Next[2],q_Next[3],q_Next[4],q_Next[5]};
 					posjointPub.data= {q_Next[0],q_Next[1],q_Next[2],q_Next[3],q_Next[4],q_Next[5]};
-					trajPosJoint.positions = {q_Next[0],q_Next[1],q_Next[2],q_Next[3],q_Next[4],q_Next[5],act_joints[6], act_joints[7]};
-					Postrajectory.points = {trajPosJoint};
 				break;
-			case 1:
-
-					//RCLCPP_INFO(this->get_logger(), "actualBase_: '%d'", actualBase_);
+			case true:
 					
 					linkSource = "robot2/LINK_7";
 					linkEnd = "robot2/end-effector";
@@ -466,49 +442,20 @@ void IKSolver::publisher()
 					q_(3)=act_joints[2];
 					q_(4)=act_joints[1];
 					q_(5)=act_joints[0];
-					Base1 = act_joints[6]*57.2958;
-					Base2 = act_joints[7]*57.2958;
-					Base1 = normalize(Base1,-360,360);
-					Base2 = normalize(Base2,-360,360);
-					RCLCPP_INFO_STREAM(get_logger(),(Base1));
-					RCLCPP_INFO_STREAM(get_logger(),(Base2));
-					d_b1 = 0.0;
-					d_b2 = 0.0;
-					/*
-					while (abs(Base1) <= 85 || abs(Base1) >= 95 ){
-							d_b1 = 1.0;
-							flag = false;
-							break;
-						}
-					while ((((Base2) <= -5 || (Base2) >= 5 ) ) && (d_b1 == 0.0)){
-							if (flag != true){
-								//veljointPub.data = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-								//robotvelPub -> publish(veljointPub);	
-								sleep(1);
-								flag = true;
-							}
-							d_b2 = -1.0;
-							break;
-					}*/
 					jacobian_solver_->JntToJac(q_, jacobian_);
 					foward_solver_ ->JntToCart(q_,FKkin);
 					x = FKkin.p.x();
 					y = FKkin.p.y();
 					z = FKkin.p.z();
 					FKkin.M.GetRPY(roll,pitch,yaw);
-					//KDL::changeBase()
 					inverseJac = pinv(jacobian_.data);
 					dq_ = inverseJac * dxe_;
-					
-					//q_Next = q_.data + dq_*0.01;
 					q_Next[0] = q_act[0] + (dq_[0] *0.001);
 					q_Next[1] = q_act[1] + (dq_[1] *0.001);
 					q_Next[2] = q_act[2] + (dq_[2] *0.001);
 					q_Next[3] = q_act[3] + (dq_[3] *0.001);
 					q_Next[4] = q_act[4] + (dq_[4] *0.001);
 					q_Next[5] = q_act[5] + (dq_[5] *0.001);
-
-
 					commandDrives = false;
 					for (int i = 0; i < 6; i++) {
 						if (dxe_[i] != 0) {
@@ -529,45 +476,16 @@ void IKSolver::publisher()
 						q_act[4] = act_joints[1];
 						q_act[5] = act_joints[0];
 					}
-				
-					//RCLCPP_INFO_STREAM(get_logger(),q_.data);
-					
-					jointStates_.header.stamp = rclcpp::Node::get_clock() -> now();
-					Postrajectory.header.stamp = rclcpp::Node::get_clock() -> now();
-					Postrajectory.header.frame_id = "" ;
-					trajPosJoint.time_from_start.nanosec = 1000000;
-					Postrajectory.joint_names = {"J1","J2","J3","J4","J5","J6","BASE1","BASE2"};
-					jointStates_.name = {"J1","J2","J3","J4","J5","J6"};
-					jointStates_.velocity= {dq_[5],dq_[4],dq_[3],dq_[2],dq_[1],dq_[0]};
-					veljointPub.data = {dq_[5],dq_[4],dq_[3],dq_[2],dq_[1],dq_[0]};
-					jointStates_.position= {q_Next[5],q_Next[4],q_Next[3],q_Next[2],q_Next[1],q_Next[0]};
 					posjointPub.data= {q_Next[5],q_Next[4],q_Next[3],q_Next[2],q_Next[1],q_Next[0]};
-					trajPosJoint.positions = {q_Next[5],q_Next[4],q_Next[3],q_Next[2],q_Next[1],q_Next[0],act_joints[6],act_joints[7]};
-					Postrajectory.points = {trajPosJoint};
-
 				break;
 				
 		}
-
-
-		//std::cout << "x:" << x << " y:" << y << " z:" << z << " roll:" << roll << " pitch:" << pitch << " yaw:" << yaw << std::endl;
 		end_effector_p_R_.data = {(float)x,(float)y,(float)z,(float)roll,(float)pitch,(float)yaw};
-		
-		//RCLCPP_INFO(this->get_logger(),end_effector_p_R_);
-		//RCLCPP_INFO_STREAM(get_logger(),end_effector_p_R_.data[0]);
 		robotEndPub -> publish(end_effector_p_R_);  
-		
 		if (flagOK && commandDrives) {
-			//robotvelPub -> publish(veljointPub);	
-			//JTrajectory -> publish(Postrajectory);
 			robotposPub -> publish(posjointPub);
 			commandDrives = false;
 		}
-		
-		//robotJointPub -> publish(jointStates_);	
-		
-
-		
 		
 }
 

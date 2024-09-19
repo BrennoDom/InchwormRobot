@@ -21,6 +21,8 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(hardware_interface REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(backward_ros REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(dynamixel_workbench_toolbox REQUIRED)
 
@@ -28,6 +30,7 @@ add_library(
   ${PROJECT_NAME}
   SHARED
   src/dynamixel_hardware.cpp
+  GPIO/gpio_controller.cpp
 )
 target_include_directories(
   ${PROJECT_NAME}
@@ -40,12 +43,15 @@ ament_target_dependencies(
   rclcpp_lifecycle
   lifecycle_msgs
   hardware_interface
+  controller_interface
+  control_msgs
   pluginlib
   dynamixel_workbench_toolbox
   )
 
 
 pluginlib_export_plugin_description_file(hardware_interface dynamixel_hardware.xml)
+pluginlib_export_plugin_description_file(controller_interface dynamixel_hardware.xml)
 
 install(
   TARGETS ${PROJECT_NAME}
@@ -76,6 +82,8 @@ ament_export_libraries(
 ament_export_dependencies(
   rclcpp
   hardware_interface
+  controller_interface
+  control_msgs
   pluginlib
   dynamixel_workbench_toolbox
 )

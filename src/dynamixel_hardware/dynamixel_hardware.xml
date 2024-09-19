@@ -6,4 +6,9 @@
       The ROBOTIS Dynamixel system interface.
     </description>
   </class>
+  <class name="dynamixel_hardware/GPIOController" type="dynamixel_hardware::GPIOController" base_class_type="controller_interface::ControllerInterface">
+    <description>
+      This controller publishes the GPIOs.
+    </description>
+  </class>
 </library>

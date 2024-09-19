@@ -1,13 +1,13 @@
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,RegisterEventHandler
+from launch.actions import LogInfo, TimerAction, DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,RegisterEventHandler
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 from launch.conditions import IfCondition, UnlessCondition
 import os
 from ament_index_python.packages import get_package_share_directory
-from launch.event_handlers import OnProcessExit
+from launch.event_handlers import OnProcessExit,OnExecutionComplete,OnProcessStart
 import xacro
 gui = LaunchConfiguration("gui")
 
@@ -115,34 +115,113 @@ def generate_launch_description():
 	package="controller_manager",
 	executable="ros2_control_node",
         parameters=[robot_description,controller_config],
-	output="screen",
+	output="both",
     )
     robot_joint_state_broadcaster = Node(
     	 
          package="controller_manager",
          executable="spawner",
          arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-         output="screen",
+         output="log",
     
     )
     robot_controller_position = Node(
             package="controller_manager",
             executable="spawner",
             arguments=["position_controller", "-c", "/controller_manager"],
-            output="screen",
+            output="log",
     )
 
     robot_controller_velocity = Node(
             package="controller_manager",
             executable="spawner",
             arguments=["velocity_controller", "-c", "/controller_manager"],
-            output="screen",
+            output="log",
     )
-    robot_joint_trajectory = Node(
+    BASE1_CONTROLLER = Node(
             package="controller_manager",
             executable="spawner",
-            arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
-            output="screen",
+            arguments=["BASE1_CONTROLLER", "-c", "/controller_manager"],
+            output="log",
+    )
+    BASE2_CONTROLLER = Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=["BASE2_CONTROLLER", "-c", "/controller_manager"],
+            output="log",
+    )
+    gpio_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gpio_controller", "-c", "/controller_manager"],
+        output="log",
+    )
+
+    delay_joint_state_broadcaster = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=10.0,
+                actions=[robot_joint_state_broadcaster],
+                )
+            ]
+        )
+    )
+    delay_robot_controller_position = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=10.0,
+                actions=[robot_controller_position],
+                )
+            ]
+        )
+    )
+    delay_controller_velocity = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=10.0,
+                actions=[robot_controller_velocity],
+                )
+            ]
+        )
+    )
+    delay_BASE1_trajectory = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=10.0,
+                actions=[BASE1_CONTROLLER],
+                )
+            ]
+        )
+    )
+    delay_BASE2_trajectory = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=10.0,
+                actions=[BASE2_CONTROLLER],
+                )
+            ]
+        )
+    )
+    delay_gpio_controller_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=10.0,
+                actions=[gpio_controller_spawner],
+                )
+            ]
+        )
     )
 
 
@@ -152,9 +231,13 @@ def generate_launch_description():
         default_base,
         state_2,
         state_publisher,
-        #robot_controller_node,
-        #robot_joint_state_broadcaster,
-        #robot_joint_trajectory
+        robot_controller_node,
+        delay_joint_state_broadcaster,
+        delay_robot_controller_position,
+        delay_controller_velocity,
+        delay_BASE1_trajectory,
+        delay_BASE2_trajectory,
+        delay_gpio_controller_spawner
 
     ]
     return LaunchDescription(declared_arguments + nodes)

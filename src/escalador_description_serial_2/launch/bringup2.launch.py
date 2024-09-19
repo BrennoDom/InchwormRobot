@@ -2,7 +2,8 @@ import os
 import xacro
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 from launch.conditions import IfCondition
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 
@@ -65,14 +66,14 @@ def generate_launch_description():
 	package="controller_manager",
 	executable="ros2_control_node",
         parameters=[robot_description, controller_config],
-	output="screen",
+	output="both",
     )
     robot_joint_state_broadcaster = Node(
     	 
          package="controller_manager",
          executable="spawner",
          arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-         output="screen",
+         output="both",
     
     )
 
@@ -80,20 +81,20 @@ def generate_launch_description():
             package="controller_manager",
             executable="spawner",
             arguments=["position_controller", "-c", "/controller_manager"],
-            output="screen",
+            output="both",
     )
 
     robot_controller_velocity = Node(
             package="controller_manager",
             executable="spawner",
             arguments=["velocity_controller", "-c", "/controller_manager"],
-            output="screen",
+            output="both",
     )
     robot_joint_trajectory = Node(
             package="controller_manager",
             executable="spawner",
             arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
-            output="screen",
+            output="both",
     )
     robot_state_publisher_node = Node(
         namespace='robot2',
@@ -102,21 +103,30 @@ def generate_launch_description():
         output="both",
         parameters=[robot_description],
     )
+    gpio_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gpio_controller", "-c", "/controller_manager"],
+    )
+    
     state_publisher = Node(
         namespace='robot2',
         package="escalador_description_serial_2",
         executable="state_publisher",
         name="state_publisher",
-        output="screen"
+        output="both"
     )
+
+    
     nodes = [
         robot_state_publisher_node,
         state_publisher,
-        robot_controller_node,
-        robot_joint_state_broadcaster,
-        robot_controller_velocity,
-        robot_controller_position,
-        robot_joint_trajectory
+        #robot_controller_node,
+        #robot_joint_state_broadcaster,
+        #robot_controller_velocity,
+        #robot_controller_position,
+        #robot_joint_trajectory,
+        #gpio_controller_spawner
     ]
 
     return LaunchDescription(declared_arguments + nodes)
