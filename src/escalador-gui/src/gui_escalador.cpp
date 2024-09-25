@@ -50,6 +50,9 @@ GuiEscalador::GuiEscalador(QWidget *parent) :
   node_ -> declare_parameter("SrvBase", "/SrvChangeBase");
   std::string SrvChangeBase = node_->get_parameter("SrvBase").get_parameter_value().get<std::string>();
   ClientServerBase = node_ -> create_client<escalador_interfaces::srv::ChangeBase>(SrvChangeBase);
+  node_ -> declare_parameter("SrvControl","/controller_manager/switch_controller");
+  std::string SrvController = node_->get_parameter("SrvControl").get_parameter_value().get<std::string>();
+  ClientColtrol = node_ -> create_client<controller_manager_msgs::srv::SwitchController>(SrvController);
   node_ -> declare_parameter("BASE1Points","BASE1_CONTROLLER/joint_trajectory");
   std::string BASE1_Traj = node_->get_parameter("BASE1Points").get_parameter_value().get<std::string>();
   Base1Trajectory = node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(BASE1_Traj, 10);
@@ -88,7 +91,7 @@ GuiEscalador::GuiEscalador(QWidget *parent) :
   // setup the timer that will signal ros stuff to happen
   ros_timer = new QTimer(this);
   connect(ros_timer, SIGNAL(timeout()), this, SLOT(spinOnce()));
-  ros_timer->start(10);  // set the rate to 10ms  You can change this if you want to increase/decrease update rate
+  ros_timer->start(1);  // set the rate to 10ms  You can change this if you want to increase/decrease update rate
 
   // tell the window to display itself
   this->show();
@@ -110,11 +113,12 @@ void GuiEscalador::spinOnce(){
 
         rclcpp::spin_some(node_);
         std_msgs::msg::Int32MultiArray vels_ve;
-        vels_ve.data = {ui->slider_x->value(),ui->slider_y->value(),ui->slider_z->value(),ui->slider_roll->value(),ui->slider_pitch->value(),ui->slider_yaw->value()};
+        vels_ve.data = {ui->slider_x->value()*VelOffset/100,ui->slider_y->value()*VelOffset/100,ui->slider_z->value()*VelOffset/100,ui->slider_roll->value()*VelOffset/100,ui->slider_pitch->value()*VelOffset/100,ui->slider_yaw->value()*VelOffset/100};
         //ss << "hello world ";//<< ui->hi_num->value();
         //msg.data = "hello world ";
-
+        VelOffset = ui->slider_offset->value();
         Vel_xe_->publish(vels_ve);
+        ui->label_veloffset->setText(QString::number(VelOffset));
 
         //ui->hi_num->setValue(ui->hi_num->value()+1);
         switch (J1_TE){
@@ -127,6 +131,9 @@ void GuiEscalador::spinOnce(){
                 }
                 else{
                    ui->STATUS_J1->setStyleSheet("");
+                }
+                if ((ControlChanges_Status == 0)&&(FlagInit==true)){
+                   ControlChanges_Status = ControlChanged();
                 }
                 break;
             case 1:
@@ -145,6 +152,9 @@ void GuiEscalador::spinOnce(){
                 else{
                    ui->STATUS_J2->setStyleSheet("");
                 }
+                if ((ControlChanges_Status == 0)&&(FlagInit==true)){
+                   ControlChanges_Status = ControlChanged();
+                }
                 break;
             case 1:
                    ui->ButtonEN_J2->setText("Disable");
@@ -161,6 +171,9 @@ void GuiEscalador::spinOnce(){
                 }
                 else{
                    ui->STATUS_J3->setStyleSheet("");
+                }
+                if ((ControlChanges_Status == 0)&&(FlagInit==true)){
+                   ControlChanges_Status = ControlChanged();
                 }
                 break;
             case 1:
@@ -179,6 +192,9 @@ void GuiEscalador::spinOnce(){
                 else{
                    ui->STATUS_J4->setStyleSheet("");
                 }
+                if ((ControlChanges_Status == 0)&&(FlagInit==true)){
+                   ControlChanges_Status = ControlChanged();
+                }
                 break;
             case 1:
                    ui->ButtonEN_J4->setText("Disable");
@@ -195,6 +211,9 @@ void GuiEscalador::spinOnce(){
                 }
                 else{
                    ui->STATUS_J5->setStyleSheet("");
+                }
+                if ((ControlChanges_Status == 0)&&(FlagInit==true)){
+                   ControlChanges_Status = ControlChanged();
                 }
                 break;
             case 1:
@@ -213,6 +232,9 @@ void GuiEscalador::spinOnce(){
                 else{
                    ui->STATUS_J6->setStyleSheet("");
                 }
+                if ((ControlChanges_Status == 0)&&(FlagInit==true)){
+                   ControlChanges_Status = ControlChanged();
+                }
                 break;
             case 1:
                    ui->ButtonEN_J6->setText("Disable");
@@ -229,6 +251,9 @@ void GuiEscalador::spinOnce(){
                 }
                 else{
                    ui->STATUS_BASE1->setStyleSheet("");
+                }
+                if ((ControlChanges_Status == 0)||(ControlChanges_Status == 99)){
+                   ControlChanges_Status = ControlChanged();
                 }
                 break;
             case 1:
@@ -247,6 +272,9 @@ void GuiEscalador::spinOnce(){
                 else{
                    ui->STATUS_BASE2->setStyleSheet("");
                 }
+                if ((ControlChanges_Status == 0)&&(FlagInit==true)){
+                   ControlChanges_Status = ControlChanged();
+                }
                 break;
             case 1:
                    ui->ButtonEN_J8->setText("Disable");
@@ -255,17 +283,10 @@ void GuiEscalador::spinOnce(){
                 break;
         }
 
-
-
-
-
-
-
-
-
-
-
-
+        if ((FlagChangeBase==true)&&(oldButton4 != 1.0)){
+            ui->Base_Change->click();
+        }
+        
     }
     else{
         QApplication::quit();
@@ -298,10 +319,14 @@ void GuiEscalador::StatusDynamixelCallback(const control_msgs::msg::InterfaceVal
     J6_Status   = msg->values[21]*1000;
     J7_Status   = msg->values[22]*1000;
     J8_Status   = msg->values[23]*1000;
+
+    FlagInit=true;
+
 }
 
 void GuiEscalador::ActualBaseCallback(const std_msgs::msg::Int8 msg){
     ActualBase = msg.data;
+
 
     if (ActualBase == 0 && LastRef==false){
         ui->label_kin_ref->setText("Normal");
@@ -364,14 +389,58 @@ void GuiEscalador::JointsCallback(const sensor_msgs::msg::JointState::SharedPtr 
 
 void GuiEscalador::JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg){
 
-    double offset = ((BUTTON_L2_TRIGGER) - (BUTTON_R2_TRIGGER)) * 50;
-    
-    ui->slider_x->setValue(offset * BUTTON_SQUARE);
-    ui->slider_y->setValue(offset * BUTTON_TRIANGLE);
-    ui->slider_z->setValue(offset * BUTTON_CROSS);
-    ui->slider_roll->setValue(offset * ((BUTTON_UP_DOWN == -1) ? 1 : 0));
-    ui->slider_pitch->setValue(offset * ((BUTTON_LEFT_RIGHT == -1) ? 1 : 0));
-    ui->slider_yaw->setValue(offset * ((BUTTON_LEFT_RIGHT == 1) ? 1 : 0));
+    ui->slider_offset->setValue((AXIS_VEL+1)*100);
+
+
+
+    if ((BUTTON_EN_TORQUE == 1.0) && (oldButton3 != 1.0)){
+        ui->Enable_ALL->click();
+    }
+
+    if ((BUTTON_4 == 1.0) && (FlagChangeBase != true) && (oldButton4 == 1.0)){
+        FlagChangeBase = true;
+        oldButton4 = 1.0;
+    }
+    if ((BUTTON_5 == 1.0) && (oldButton5 != 1.0)){
+        ui->BASE_1_change->click();
+        oldButton5 = 1.0;
+    }
+    if ((BUTTON_6 == 1.0) && (oldButton6 != 1.0)){
+        ui->BASE_2_change->click();
+        oldButton6 = 1.0;
+    }
+    ((BUTTON_EN_TORQUE == 1.0) ? oldButton3 = 1.0 : oldButton3 = 0.0);
+    ((BUTTON_4 == 1.0) ? oldButton4 = 1.0 : oldButton4 = 0.0);
+    ((BUTTON_5 == 1.0) ? oldButton5 = 1.0 : oldButton5 = 0.0);
+    ((BUTTON_6 == 1.0) ? oldButton6 = 1.0 : oldButton6 = 0.0);
+
+
+    float offset = VelOffset;
+
+    if ((BUTTON_ACTIVATE == 1.0)&&(BUTTON_POS_ORI == 1.0)){
+        ui->slider_roll->setValue(offset * ((abs(AXIS_ROLL_Y) > 0.2) ? -1*AXIS_ROLL_Y : 0.0));
+        ui->slider_pitch->setValue(offset * ((abs(AXIS_PITCH_X) > 0.2) ? -1*AXIS_PITCH_X : 0.0));
+        ui->slider_yaw->setValue(offset * ((abs(AXIS_YAW_Z) > 0.2) ? -1*AXIS_YAW_Z : 0.0));
+        ui->slider_y->setValue(0);
+        ui->slider_x->setValue(0);
+        ui->slider_z->setValue(0);
+    }
+    else if ((BUTTON_ACTIVATE == 1.0)&&(BUTTON_POS_ORI == 0.0)){
+        ui->slider_y->setValue(offset * ((abs(AXIS_ROLL_Y) > 0.2) ? -1*AXIS_ROLL_Y : 0.0));
+        ui->slider_x->setValue(offset * ((abs(AXIS_PITCH_X) > 0.2) ? -1*AXIS_PITCH_X : 0.0));
+        ui->slider_z->setValue(offset * ((abs(AXIS_YAW_Z) > 0.2) ? AXIS_YAW_Z : 0.0));
+        ui->slider_roll->setValue(0);
+        ui->slider_pitch->setValue(0);
+        ui->slider_yaw->setValue(0);
+    }
+    else if ((BUTTON_ACTIVATE == 0.0)&&(BUTTON_POS_ORI == 0.0)){
+        ui->slider_y->setValue(0.0);
+        ui->slider_x->setValue(0.0);
+        ui->slider_z->setValue(0.0);
+        ui->slider_roll->setValue(0.0);
+        ui->slider_pitch->setValue(0.0);
+        ui->slider_yaw->setValue(0.0);
+    }
 
 }
 int main(int argc, char * argv[])
@@ -428,6 +497,7 @@ void GuiEscalador::on_slider_yaw_sliderReleased()
 void GuiEscalador::on_ButtonEN_J1_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J1_TE){
         case 0:
@@ -445,6 +515,7 @@ void GuiEscalador::on_ButtonEN_J1_clicked()
 void GuiEscalador::on_ButtonEN_J2_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J2_TE){
         case 0:
@@ -462,6 +533,7 @@ void GuiEscalador::on_ButtonEN_J2_clicked()
 void GuiEscalador::on_ButtonEN_J3_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J3_TE){
         case 0:
@@ -479,6 +551,7 @@ void GuiEscalador::on_ButtonEN_J3_clicked()
 void GuiEscalador::on_ButtonEN_J4_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J4_TE){
         case 0:
@@ -496,6 +569,7 @@ void GuiEscalador::on_ButtonEN_J4_clicked()
 void GuiEscalador::on_ButtonEN_J5_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J5_TE){
         case 0:
@@ -513,6 +587,7 @@ void GuiEscalador::on_ButtonEN_J5_clicked()
 void GuiEscalador::on_ButtonEN_J6_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J6_TE){
         case 0:
@@ -530,9 +605,11 @@ void GuiEscalador::on_ButtonEN_J6_clicked()
 void GuiEscalador::on_ButtonEN_J7_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J7_TE){
         case 0:
+
             command = 1.0;
             break;
         case 1:
@@ -547,6 +624,7 @@ void GuiEscalador::on_ButtonEN_J7_clicked()
 void GuiEscalador::on_ButtonEN_J8_clicked()
 {
     std_msgs::msg::Float64MultiArray commands_dynamixel;
+    ControlChanges_Status = 0;
     float command;
     switch (J8_TE){
         case 0:
@@ -567,6 +645,7 @@ void GuiEscalador::on_Enable_ALL_clicked()
     float command;
     if (J1_TE==1 && J2_TE==1 && J3_TE==1 && J4_TE==1 && J5_TE==1 && J6_TE==1 && J7_TE==1 && J8_TE==1){
         command = 0.0;
+        ControlChanges_Status = 0;
     }else{
         command = 1.0;
     }
@@ -617,12 +696,105 @@ void GuiEscalador::on_Base_Change_clicked()
           LastRef = true;
       }
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"),"Success!");
+        FlagChangeBase = false;
 
       } else {
-        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service add_two_ints");
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service");
+        FlagChangeBase = false;
       }
 
 }
+int GuiEscalador::BaseChanges(){
+    auto command=false;
+    if (ActualBase == 0){
+        command = true;
+    }else{
+        command = false;
+    }
+
+    auto request = std::make_shared<escalador_interfaces::srv::ChangeBase::Request>();
+      request->change = command;
+
+    auto result = ClientServerBase->async_send_request(request);
+      // Wait for the result.
+      if (rclcpp::spin_until_future_complete(node_, result) ==
+        rclcpp::FutureReturnCode::SUCCESS)
+      {
+      if(command == false){
+          ui->label_act_base->setText("Base 0");
+          LastRef = false;
+      }else{
+          ui->label_act_base->setText("Base 1");
+          LastRef = true;
+      }
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"),"Success!");
+        return (1);
+
+      } else {
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service");
+        return (0);
+      }
+}
+int GuiEscalador::ControlChanged(){
+    const std::vector<std::string> controllers = {"position_controller"};
+
+   // bool FlagControl = false;
+
+    auto request_deactivate = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
+    request_deactivate->deactivate_controllers=controllers ;
+
+    request_deactivate->strictness = controller_manager_msgs::srv::SwitchController::Request::BEST_EFFORT;
+
+
+    auto result = ClientColtrol->async_send_request(request_deactivate);
+      // Wait for the result.
+      if (rclcpp::spin_until_future_complete(node_, result) ==
+        rclcpp::FutureReturnCode::SUCCESS)
+      {
+        //FlagControl = true;
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"),"Success!");
+
+
+        auto request_activate = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
+        request_activate -> activate_controllers=controllers;
+        request_activate -> strictness = controller_manager_msgs::srv::SwitchController::Request::BEST_EFFORT;
+
+        auto result = ClientColtrol->async_send_request(request_activate);
+          // Wait for the result.
+          if (rclcpp::spin_until_future_complete(node_, result) ==
+            rclcpp::FutureReturnCode::SUCCESS)
+          {
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"),"Success!");
+            return (1);
+          } else {
+            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service");
+            return (0);
+          }
+
+      } else {
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service");
+        return (0);
+      }
+/*
+    if(FlagControl == true){
+        auto request_activate = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
+        request_activate -> start_controllers=controllers;
+        request_activate -> strictness = controller_manager_msgs::srv::SwitchController::Request::BEST_EFFORT;
+
+        auto result = ClientColtrol->async_send_request(request_activate);
+          // Wait for the result.
+          if (rclcpp::spin_until_future_complete(node_, result) ==
+            rclcpp::FutureReturnCode::SUCCESS)
+          {
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"),"Success!");
+            return (1);
+          } else {
+            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service");
+            return (0);
+          }
+    }*/
+}
+
 
 
 void GuiEscalador::on_BASE_1_change_clicked()
@@ -676,3 +848,9 @@ void GuiEscalador::on_ChangeKin_clicked()
 }
 void GuiEscalador::on_pushButton_9_clicked(){}
 void GuiEscalador::on_tab_customContextMenuRequested(QPoint const&){};
+
+void GuiEscalador::on_slider_offset_valueChanged(int value)
+{
+    //
+}
+

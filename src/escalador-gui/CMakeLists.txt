@@ -14,6 +14,7 @@ set(ROS_PKGS
     std_msgs
     sensor_msgs
     control_msgs
+    controller_manager_msgs
     escalador_interfaces
   )
 set(LIBRARIES
@@ -64,6 +65,7 @@ rclcpp
 std_msgs
 sensor_msgs
 control_msgs
+controller_manager_msgs
 escalador_interfaces)
 target_link_libraries(gui Qt5::Widgets Qt5::PrintSupport)
 target_include_directories(gui PRIVATE "include/${PROJECT_NAME}/")

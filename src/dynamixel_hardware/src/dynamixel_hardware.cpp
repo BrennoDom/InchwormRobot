@@ -84,6 +84,7 @@ CallbackReturn DynamixelHardware::on_init(const hardware_interface::HardwareInfo
   joint_ids_.resize(info_.joints.size(), 0);
   joint_offsets_.resize(info_.joints.size(),0);
   joint_p_encoder_.resize(info_.joints.size(),0);
+  Initialized.resize(info_.joints.size(),0);
 
   for (uint i = 0; i < info_.joints.size(); i++) {
     joint_ids_[i] = std::stoi(info_.joints[i].parameters.at("id"));
@@ -104,6 +105,8 @@ CallbackReturn DynamixelHardware::on_init(const hardware_interface::HardwareInfo
 
   CommandsIO = std::stoi((info_.hardware_parameters.at("IOutputs")));
   StatesIO = std::stoi((info_.hardware_parameters.at("IOInputs")));
+
+  Inputs.resize(StatesIO);
 
   if (
     info_.hardware_parameters.find("use_dummy") != info_.hardware_parameters.end() &&
@@ -262,7 +265,7 @@ std::vector<hardware_interface::StateInterface> DynamixelHardware::export_state_
       info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &joints_[i].state.effort));
   }
 
-  Inputs.resize(StatesIO);
+ 
   size_t ct = 0;
   for (size_t i = 0; i < info_.gpios.size(); i++)
   {
@@ -335,11 +338,9 @@ return_type DynamixelHardware::read(const rclcpp::Time & /* time */, const rclcp
       Inputs[i] = Outputs[i];
     }
 
-    for (uint i = Outputs.size(); i < Inputs.size(); i++)
+    for (uint i = 8; i < Inputs.size(); i++)
     {
-      unsigned int seed = time(NULL) + 1;
-      Inputs[i] = static_cast<float>(rand_r(&seed));
-      seed = time(NULL) + 2;
+      Inputs[i] = 0.0;
     }
     // random inputs
 
@@ -347,9 +348,9 @@ return_type DynamixelHardware::read(const rclcpp::Time & /* time */, const rclcp
 
     for (uint i = 0; i < Inputs.size(); i++)
     {
-      RCLCPP_INFO(
-        rclcpp::get_logger("RRBotSystemWithGPIOHardware"), "Read %.1f from GP input %d!",
-        Inputs[i], i);
+    //  RCLCPP_INFO(
+    //    rclcpp::get_logger("RRBotSystemWithGPIOHardware"), "Read %.1f from GP input %d!",
+    //    Inputs[i], i);
     }
     return return_type::OK;
   }
@@ -502,32 +503,35 @@ return_type DynamixelHardware::write(const rclcpp::Time & /* time */, const rclc
   for (uint i = 0; i < info_.joints.size(); ++i)
   {
 
+    if (Inputs[i] < 1.0){
+      joints_[i].command.position = joints_[i].state.position;
+      joints_[i].command.velocity = 0.0;
+      joints_[i].command.effort = 0.0;
+      joints_[i].prev_command.position = joints_[i].command.position;
+      joints_[i].prev_command.velocity = joints_[i].command.velocity;
+      joints_[i].prev_command.effort = joints_[i].command.effort;
+    }
 
-
-    if (Outputs[i] == 1.0 && Inputs[i]!= 1.0){
-      reset_command();
+    if (Outputs[i] == 1.0 && Inputs[i]!= 1.0 && Inputs[i+16] <= 1.0){
       Outputs[i+8] = 0.0;
       if (!dynamixel_workbench_.torqueOn(joint_ids_[i], &log)) {
         RCLCPP_FATAL(rclcpp::get_logger(kDynamixelHardware), "%s", log);
         return return_type::ERROR;
       }
     }
-    else if(Outputs[i] == 0.0 && Inputs[i]!= 0.0){
-      reset_command();
+    if(Outputs[i] == 0.0 && Inputs[i]!= 0.0 && Inputs[i+16] <= 1.0){
+      
       if (!dynamixel_workbench_.torqueOff(joint_ids_[i], &log)) {
         RCLCPP_FATAL(rclcpp::get_logger(kDynamixelHardware), "%s", log);
         return return_type::ERROR;
       }
     }
-    else if(Outputs[i+8] == 1.0 && Inputs[i]!= 1.0){
-      reset_command();
-      Outputs[i] = 0.0;
+    if(Outputs[i+8] == 1.0 && Inputs[i]== 0.0){
       if (!dynamixel_workbench_.reboot(joint_ids_[i], &log)) {
-        RCLCPP_FATAL(rclcpp::get_logger(kDynamixelHardware), "%s", log);
-        return return_type::ERROR;
-      }else{Outputs[i+8] == 0.0;}
+        }else{RCLCPP_INFO(rclcpp::get_logger(kDynamixelHardware), "Rebooting %dº Dynamixel",i);
+        set_joint_params();
+        Outputs[i+8] = 0.0;}
     }
-
 
   }
   // if all command values are unchanged, then remain in existing control mode and set corresponding command values
@@ -551,7 +555,7 @@ return_type DynamixelHardware::write(const rclcpp::Time & /* time */, const rclc
 return_type DynamixelHardware::enable_torque(const bool enabled)
 {
   const char * log = nullptr;
-
+  reset_command();
   if (enabled && !torque_enabled_) {
     for (uint i = 0; i < info_.joints.size(); ++i) {
       if (!dynamixel_workbench_.torqueOff(joint_ids_[i], &log)) {
@@ -655,12 +659,19 @@ return_type DynamixelHardware::reset_command()
 
 CallbackReturn DynamixelHardware::set_joint_positions()
 {
+  
   const char * log = nullptr;
   std::vector<int32_t> commands(info_.joints.size(), 0);
   std::vector<uint8_t> ids(info_.joints.size(), 0);
 
   std::copy(joint_ids_.begin(), joint_ids_.end(), ids.begin());
+  
   for (uint i = 0; i < ids.size(); i++) {
+
+    if (Inputs[i] = 0.0){
+      joints_[i].command.position = joints_[i].state.position;
+      joints_[i].prev_command.position = joints_[i].command.position;
+    }
     joints_[i].prev_command.position = joints_[i].command.position;
     
     commands[i] = dynamixel_workbench_.convertRadian2Value(
@@ -701,10 +712,22 @@ CallbackReturn DynamixelHardware::set_joint_params()
     for (auto paramName : kExtraJointParameters) {
       if (info_.joints[i].parameters.find(paramName) != info_.joints[i].parameters.end()) {
         auto value = std::stoi(info_.joints[i].parameters.at(paramName));
-        if (!dynamixel_workbench_.itemWrite(joint_ids_[i], paramName, value, &log)) {
+        if (Initialized[i]==false){
+          if (!dynamixel_workbench_.itemWrite(joint_ids_[i], paramName, value, &log)) {
           RCLCPP_FATAL(rclcpp::get_logger(kDynamixelHardware), "%s", log);
           return CallbackReturn::ERROR;
+          }
+          Initialized[i] = true;
         }
+        else{
+          if(Inputs[i]==0.0){
+            if (!dynamixel_workbench_.itemWrite(joint_ids_[i], paramName, value, &log)) {
+            RCLCPP_FATAL(rclcpp::get_logger(kDynamixelHardware), "%s", log);
+            return CallbackReturn::ERROR;
+            }
+          }          
+        }
+
         RCLCPP_INFO(rclcpp::get_logger(kDynamixelHardware), "%s set to %d for joint %d", paramName, value, i);
       }
     }

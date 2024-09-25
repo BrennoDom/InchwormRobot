@@ -162,70 +162,70 @@
         </state_interface>
       </gpio>
       <gpio name="Reboot">
-        <command_interface name="M1"/>
-        <state_interface name="M1">
+        <command_interface name="RE_1"/>
+        <state_interface name="RE_1">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M2"/>
-        <state_interface name="M2">
+        <command_interface name="RE_2"/>
+        <state_interface name="RE_2">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M3"/>
-        <state_interface name="M3">
+        <command_interface name="RE_3"/>
+        <state_interface name="RE_3">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M4"/>
-        <state_interface name="M4">
+        <command_interface name="RE_4"/>
+        <state_interface name="RE_4">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M5"/>
-        <state_interface name="M5">
+        <command_interface name="RE_5"/>
+        <state_interface name="RE_5">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M6"/>
-        <state_interface name="M6">
+        <command_interface name="RE_6"/>
+        <state_interface name="RE_6">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M7"/>
-        <state_interface name="M7">
+        <command_interface name="RE_7"/>
+        <state_interface name="RE_7">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M8"/>
-        <state_interface name="M8">
+        <command_interface name="RE_8"/>
+        <state_interface name="RE_8">
           <param name="initial_value">0.0</param>
         </state_interface>
       </gpio>
       <gpio name="Status">
-        <command_interface name="M1"/>
-        <state_interface name="M1">
+        <command_interface name="Status_1"/>
+        <state_interface name="Status_1">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M2"/>
-        <state_interface name="M2">
+        <command_interface name="Status_2"/>
+        <state_interface name="Status_2">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M3"/>
-        <state_interface name="M3">
+        <command_interface name="Status_3"/>
+        <state_interface name="Status_3">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M4"/>
-        <state_interface name="M4">
+        <command_interface name="Status_4"/>
+        <state_interface name="Status_4">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M5"/>
-        <state_interface name="M5">
+        <command_interface name="Status_5"/>
+        <state_interface name="Status_5">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M6"/>
-        <state_interface name="M6">
+        <command_interface name="Status_6"/>
+        <state_interface name="Status_6">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M7"/>
-        <state_interface name="M7">
+        <command_interface name="Status_7"/>
+        <state_interface name="Status_7">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <command_interface name="M8"/>
-        <state_interface name="M8">
+        <command_interface name="Status_8"/>
+        <state_interface name="Status_8">
           <param name="initial_value">0.0</param>
         </state_interface>
       </gpio>

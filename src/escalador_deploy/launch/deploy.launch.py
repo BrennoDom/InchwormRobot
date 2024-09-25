@@ -110,6 +110,12 @@ def generate_launch_description():
         name="ik_kinematics_node",
         output="screen"
     )
+    interface = Node(
+        package ='escalador-gui',
+        executable="gui",
+        name="gui",
+        output="screen"
+    )
     robot_controller_node = Node(
         
 	package="controller_manager",
@@ -155,6 +161,52 @@ def generate_launch_description():
         executable="spawner",
         arguments=["gpio_controller", "-c", "/controller_manager"],
         output="log",
+    )
+
+
+    launch_state2 = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=state_1,
+            on_start=[
+                TimerAction(
+                period=0.1,
+                actions=[state_2],
+                )
+            ]
+        )
+    )
+    launch_state_publisher = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=state_2,
+            on_start=[
+                TimerAction(
+                period=0.1,
+                actions=[state_publisher],
+                )
+            ]
+        )
+    )
+    launch_default_base = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=state_publisher,
+            on_start=[
+                TimerAction(
+                period=0.1,
+                actions=[default_base],
+                )
+            ]
+        )
+    )
+    launch_robot_controller = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=default_base,
+            on_start=[
+                TimerAction(
+                period=0.1,
+                actions=[robot_controller_node],
+                )
+            ]
+        )
     )
 
     delay_joint_state_broadcaster = RegisterEventHandler(
@@ -223,21 +275,55 @@ def generate_launch_description():
             ]
         )
     )
+    delay_kinematics = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=11.0,
+                actions=[kinematics],
+                )
+            ]
+        )
+    )
+    delay_interface = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=rviz_node,
+            on_start=[
+                TimerAction(
+                period=0.1,
+                actions=[interface],
+                )
+            ]
+        )
+    )
+    delay_rviz = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=robot_controller_node,
+            on_start=[
+                TimerAction(
+                period=11.0,
+                actions=[rviz_node],
+                )
+            ]
+        )
+    )
 
 
     nodes = [
         state_1,
-        rviz_node,
-        default_base,
-        state_2,
-        state_publisher,
-        robot_controller_node,
+        launch_state2,
+        launch_state_publisher,
+        launch_default_base,
+        launch_robot_controller,
         delay_joint_state_broadcaster,
         delay_robot_controller_position,
-        delay_controller_velocity,
         delay_BASE1_trajectory,
         delay_BASE2_trajectory,
-        delay_gpio_controller_spawner
+        delay_gpio_controller_spawner,
+        delay_kinematics,
+        delay_interface,
+        delay_rviz
 
     ]
     return LaunchDescription(declared_arguments + nodes)

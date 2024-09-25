@@ -35,6 +35,7 @@
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <control_msgs/msg/interface_value.hpp>
+#include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <std_msgs/msg/int8.hpp>
 #include <escalador_interfaces/srv/change_base.hpp>
 #include <escalador_interfaces/msg/actual_base.hpp>
@@ -44,22 +45,25 @@
 #include <std_msgs/msg/bool.hpp>
 
 // Map PS5 dualsense buttons
-#define BUTTON_CROSS        msg->buttons[0]
-#define BUTTON_CIRCLE       msg->buttons[1]
-#define BUTTON_TRIANGLE     msg->buttons[4]
-#define BUTTON_SQUARE       msg->buttons[3]
-#define BUTTON_L1           msg->buttons[4]
-#define BUTTON_R1           msg->buttons[5]
-#define BUTTON_L2           msg->buttons[6]
-#define BUTTON_R2           msg->buttons[7]
-#define AXIS_LEFT_X         msg->axes[0]
-#define AXIS_LEFT_Y         msg->axes[1]
-#define BUTTON_L2_TRIGGER   msg->axes[5]
-#define AXIS_RIGHT_X        msg->axes[3]
-#define AXIS_RIGHT_Y        msg->axes[2]
-#define BUTTON_R2_TRIGGER   msg->axes[4]
-#define BUTTON_LEFT_RIGHT   msg->axes[6]
-#define BUTTON_UP_DOWN      msg->axes[7]
+#define BUTTON_ACTIVATE     msg->buttons[0]
+#define BUTTON_POS_ORI      msg->buttons[1]
+#define BUTTON_EN_TORQUE    msg->buttons[2]
+#define BUTTON_4            msg->buttons[3]
+#define BUTTON_5            msg->buttons[4]
+#define BUTTON_6            msg->buttons[5]
+#define BUTTON_7            msg->buttons[6]
+#define BUTTON_8            msg->buttons[7]
+#define BUTTON_9            msg->buttons[8]
+#define BUTTON_10           msg->buttons[9]
+#define BUTTON_11           msg->buttons[10]
+#define BUTTON_12           msg->buttons[11]
+#define AXIS_ROLL_Y         msg->axes[0]
+#define AXIS_PITCH_X        msg->axes[1]
+#define AXIS_YAW_Z          msg->axes[2]
+#define AXIS_VEL            msg->axes[3]
+#define AXIS_STICK_UD       msg->axes[4]
+#define AXIS_STICK_RL       msg->axes[5]
+
 
 namespace Ui {
 class GuiEscalador;
@@ -78,10 +82,15 @@ public:
   void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
   void StatusDynamixelCallback(const control_msgs::msg::InterfaceValue::SharedPtr msg);
   void ActualBaseCallback(const std_msgs::msg::Int8 msg);
+  int ControlChanged();
+  int BaseChanges();
 
-  bool FlagInit = false, LastRef = false;
+
+  bool FlagChangeBase = false,FlagControlChanged = false,FlagInit = false, LastRef = false;
   double pos_BASE1,pos_BASE2;
-  int ActualBase;
+  int oldButton3,oldButton4,oldButton5,oldButton6;
+  int VelOffset;
+  int ControlChanges_Status = 0,ActualBase;
   int J1_TE,J2_TE,J3_TE,J4_TE,J5_TE,J6_TE,J7_TE,J8_TE;
   int J1_R,J2_R,J3_R,J4_R,J5_R,J6_R,J7_R,J8_R;
   int J1_Status,J2_Status,J3_Status,J4_Status,J5_Status,J6_Status,J7_Status,J8_Status;
@@ -139,6 +148,9 @@ private slots:
 
   void on_ChangeKin_clicked();
 
+
+  void on_slider_offset_valueChanged(int value);
+
 private:
   Ui::GuiEscalador *ui;
   rclcpp::Executor::SharedPtr exec_;
@@ -160,6 +172,7 @@ private:
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr Dynamixel_commands;
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr Reference_commands;
   rclcpp::Client<escalador_interfaces::srv::ChangeBase>::SharedPtr ClientServerBase;
+  rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr ClientColtrol;
 };
 
 #endif

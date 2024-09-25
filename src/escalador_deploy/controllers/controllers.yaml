@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
+    update_rate: 1000  # Hz
 
     position_controller:
       type: position_controllers/JointGroupPositionController
@@ -68,7 +68,6 @@ BASE2_CONTROLLER:
 gpio_controller:
 
   ros__parameters:
-  
     inputs:
      - TorqueEnable/TE_1
      - TorqueEnable/TE_2
@@ -78,22 +77,22 @@ gpio_controller:
      - TorqueEnable/TE_6
      - TorqueEnable/TE_7
      - TorqueEnable/TE_8
-     - Reboot/M1
-     - Reboot/M2
-     - Reboot/M3
-     - Reboot/M4
-     - Reboot/M5
-     - Reboot/M6
-     - Reboot/M7
-     - Reboot/M8
-     - Status/M1
-     - Status/M2
-     - Status/M3
-     - Status/M4
-     - Status/M5
-     - Status/M6
-     - Status/M7
-     - Status/M8
+     - Reboot/RE_1
+     - Reboot/RE_2
+     - Reboot/RE_3
+     - Reboot/RE_4
+     - Reboot/RE_5
+     - Reboot/RE_6
+     - Reboot/RE_7
+     - Reboot/RE_8
+     - Status/Status_1
+     - Status/Status_2
+     - Status/Status_3
+     - Status/Status_4
+     - Status/Status_5
+     - Status/Status_6
+     - Status/Status_7
+     - Status/Status_8
 
 
     outputs:
@@ -105,11 +104,11 @@ gpio_controller:
      - TorqueEnable/TE_6
      - TorqueEnable/TE_7
      - TorqueEnable/TE_8
-     - Reboot/M1
-     - Reboot/M2
-     - Reboot/M3
-     - Reboot/M4
-     - Reboot/M5
-     - Reboot/M6
-     - Reboot/M7
-     - Reboot/M8
+     - Reboot/RE_1
+     - Reboot/RE_2
+     - Reboot/RE_3
+     - Reboot/RE_4
+     - Reboot/RE_5
+     - Reboot/RE_6
+     - Reboot/RE_7
+     - Reboot/RE_8
