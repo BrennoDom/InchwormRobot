@@ -8,11 +8,17 @@ controller_manager:
     velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
 
-    joint_trajectory_controller:
+    BASE1_CONTROLLER:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    BASE2_CONTROLLER:
       type: joint_trajectory_controller/JointTrajectoryController
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
+
+    gpio_controller:
+      type: dynamixel_hardware/GPIOController
 
     
 
@@ -25,6 +31,7 @@ velocity_controller:
       - J4
       - J5
       - J6
+    
 
 position_controller:
   ros__parameters:
@@ -35,11 +42,22 @@ position_controller:
       - J4
       - J5
       - J6
+    
       
-joint_trajectory_controller:
+BASE1_CONTROLLER:
   ros__parameters:
     joints:
       - BASE1
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+
+BASE2_CONTROLLER:
+  ros__parameters:
+    joints:
       - BASE2
 
     command_interfaces:
@@ -47,3 +65,52 @@ joint_trajectory_controller:
 
     state_interfaces:
       - position
+
+gpio_controller:
+
+  ros__parameters:
+  
+    inputs:
+     - TorqueEnable/TE_1
+     - TorqueEnable/TE_2
+     - TorqueEnable/TE_3
+     - TorqueEnable/TE_4
+     - TorqueEnable/TE_5
+     - TorqueEnable/TE_6
+     - TorqueEnable/TE_7
+     - TorqueEnable/TE_8
+     - Reboot/RE_1
+     - Reboot/RE_2
+     - Reboot/RE_3
+     - Reboot/RE_4
+     - Reboot/RE_5
+     - Reboot/RE_6
+     - Reboot/RE_7
+     - Reboot/RE_8
+     - Status/Status_1
+     - Status/Status_2
+     - Status/Status_3
+     - Status/Status_4
+     - Status/Status_5
+     - Status/Status_6
+     - Status/Status_7
+     - Status/Status_8
+
+
+    outputs:
+     - TorqueEnable/TE_1
+     - TorqueEnable/TE_2
+     - TorqueEnable/TE_3
+     - TorqueEnable/TE_4
+     - TorqueEnable/TE_5
+     - TorqueEnable/TE_6
+     - TorqueEnable/TE_7
+     - TorqueEnable/TE_8
+     - Reboot/RE_1
+     - Reboot/RE_2
+     - Reboot/RE_3
+     - Reboot/RE_4
+     - Reboot/RE_5
+     - Reboot/RE_6
+     - Reboot/RE_7
+     - Reboot/RE_8

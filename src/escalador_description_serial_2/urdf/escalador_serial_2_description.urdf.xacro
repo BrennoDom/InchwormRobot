@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
   <xacro:macro name="robot2" params="parent prefix *origin">
     <joint name="${prefix}base_joint" type="fixed">
     <xacro:insert_block name="origin" />

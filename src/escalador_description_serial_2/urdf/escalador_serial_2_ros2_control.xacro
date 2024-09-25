@@ -5,10 +5,12 @@
 
     <ros2_control name="${name}" type="system">
       <hardware>
-        <plugin>dynamixel_hardware/DynamixelHardware</plugin>
+         <plugin>dynamixel_hardware/DynamixelHardware</plugin>
          <param name="usb_port">/dev/ttyUSB0</param>
          <param name="baud_rate">1000000</param> 
-         <!--<param name="use_dummy">true</param>-->
+         <param name="use_dummy">true</param>
+         <param name="IOInputs">16</param>
+         <param name="IOutputs">16</param>
       </hardware>
       <joint name="J1">
         <param name="id">01</param>
@@ -60,7 +62,7 @@
       </joint>
       <joint name="J4">
         <param name="id">04</param>
-        <param name="offset">-0.73</param> 
+        <param name="offset">-2.37</param> 
         <param name="Profile_Velocity">20</param>
         <param name="Position_P_Gain">1200</param>
         <param name="Position_I_Gain">2100</param>
@@ -125,6 +127,108 @@
         <state_interface name="velocity"/>
         <state_interface name="effort"/>
       </joint>
+      <gpio name="TorqueEnable">
+        <command_interface name="TE_1"/>
+        <state_interface name="TE_1">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="TE_2"/>
+        <state_interface name="TE_2">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="TE_3"/>
+        <state_interface name="TE_3">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="TE_4"/>
+        <state_interface name="TE_4">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="TE_5"/>
+        <state_interface name="TE_5">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="TE_6"/>
+        <state_interface name="TE_6">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="TE_7"/>
+        <state_interface name="TE_7">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="TE_8"/>
+        <state_interface name="TE_8">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </gpio>
+      <gpio name="Reboot">
+        <command_interface name="RE_1"/>
+        <state_interface name="RE_1">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="RE_2"/>
+        <state_interface name="RE_2">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="RE_3"/>
+        <state_interface name="RE_3">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="RE_4"/>
+        <state_interface name="RE_4">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="RE_5"/>
+        <state_interface name="RE_5">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="RE_6"/>
+        <state_interface name="RE_6">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="RE_7"/>
+        <state_interface name="RE_7">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="RE_8"/>
+        <state_interface name="RE_8">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </gpio>
+      <gpio name="Status">
+        <command_interface name="Status_1"/>
+        <state_interface name="Status_1">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="Status_2"/>
+        <state_interface name="Status_2">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="Status_3"/>
+        <state_interface name="Status_3">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="Status_4"/>
+        <state_interface name="Status_4">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="Status_5"/>
+        <state_interface name="Status_5">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="Status_6"/>
+        <state_interface name="Status_6">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="Status_7"/>
+        <state_interface name="Status_7">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <command_interface name="Status_8"/>
+        <state_interface name="Status_8">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </gpio>
     </ros2_control>
 
   </xacro:macro>
