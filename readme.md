@@ -25,7 +25,7 @@ In file ```/src/escalador_description_serial_2/urdf/escalador_serial_2_ros2_cont
          <param name="IOutputs">16</param>
       </hardware>
 ```
-Also, each configure the ```offset```,```PID``` gains and ```id``` parameters like my ```J1```:
+Also, configure the ```offset```,```PID``` gains and ```id``` parameters for each motors like my ```J1```:
 ```xml
     <joint name="J1">
         <param name="id">01</param>
